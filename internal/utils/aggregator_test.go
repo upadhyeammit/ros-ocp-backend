@@ -47,9 +47,36 @@ type UsageData struct {
 	Memory_rss_usage_container_sum string `dataframe:"memory_rss_usage_container_sum,float"`
 }
 
-func Test_filter_valid_k8s_object_types(t *testing.T) {
-	// Check valid k8s object type
+func Test_filter_valid_csv_records(t *testing.T) {
 	usage_data := []UsageData{
+		// k8s object with missing data
+		{
+			"2023-02-01 00:00:00 +0000 UTC", "2023-03-01 00:00:00 +0000 UTC", "2023-06-02 00:00:01 +0000 UTC", "2023-06-02 00:15:00 +0000 UTC",
+			"Yuptoo-service", "Yuptoo-app-standalone-1", "Yuptoo-app", "ReplicaSet", "testdeployment", "deployment", "Yuptoo-prod",
+			"quay.io/cloudservices/yuptoo", "ip-10-0-176-227.us-east-2.compute.internal", "i-0dfbb3fa4d0e8fc94",
+			"1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "",
+		},
+		{
+			"2023-02-01 00:00:00 +0000 UTC", "2023-03-01 00:00:00 +0000 UTC", "2023-06-02 00:00:01 +0000 UTC", "2023-06-02 00:15:00 +0000 UTC",
+			"Yuptoo-service", "Yuptoo-app-standalone-1", "Yuptoo-app", "ReplicaSet", "testdeployment", "deployment", "Yuptoo-prod",
+			"quay.io/cloudservices/yuptoo", "ip-10-0-176-227.us-east-2.compute.internal", "i-0dfbb3fa4d0e8fc94",
+			"1", "1", "1", "1", "", "", "", "", "1", "1", "1", "1", "1", "1", "1", "", "", "", "", "", "", "", "",
+		},
+		// k8s object with 0 CPU, Memory and RSS usage
+		{
+			"2023-02-01 00:00:00 +0000 UTC", "2023-03-01 00:00:00 +0000 UTC", "2023-06-02 00:00:01 +0000 UTC", "2023-06-02 00:15:00 +0000 UTC",
+			"Yuptoo-service", "Yuptoo-app-standalone-1", "Yuptoo-app", "ReplicaSet", "testdeployment", "deployment", "Yuptoo-prod",
+			"quay.io/cloudservices/yuptoo", "ip-10-0-176-227.us-east-2.compute.internal", "i-0dfbb3fa4d0e8fc94",
+			"1", "1", "1", "1", "0", "0", "0", "0", "1", "1", "1", "1", "1", "1", "1", "0", "0", "0", "0", "0", "0", "0", "0",
+		},
+	}
+	df := dataframe.LoadStructs(usage_data)
+	result, no_of_dropped_records := filter_valid_csv_records(df)
+	if result.Nrow() != 1 || no_of_dropped_records != 2 {
+		t.Error("Invalid k8s object type did not get dropped")
+	}
+
+	usage_data = []UsageData{
 		// k8s object type DaemonSet
 		{
 			"2023-02-01 00:00:00 +0000 UTC", "2023-03-01 00:00:00 +0000 UTC", "2023-06-02 00:00:01 +0000 UTC", "2023-06-02 00:15:00 +0000 UTC",
@@ -93,9 +120,8 @@ func Test_filter_valid_k8s_object_types(t *testing.T) {
 			"1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1",
 		},
 	}
-	df := dataframe.LoadStructs(usage_data)
-	df = determine_k8s_object_type(df)
-	result := filter_valid_k8s_object_types(df)
+	df = dataframe.LoadStructs(usage_data)
+	result, _ = filter_valid_csv_records(df)
 	fmt.Println(result.Nrow())
 	if result.Nrow() != 6 {
 		t.Error("Data not filtered properly. Some of the valid k8s object type got dropped")
@@ -112,40 +138,8 @@ func Test_filter_valid_k8s_object_types(t *testing.T) {
 		},
 	}
 	df = dataframe.LoadStructs(usage_data)
-	df = determine_k8s_object_type(df)
-	result = filter_valid_k8s_object_types(df)
+	result, _ = filter_valid_csv_records(df)
 	if result.Nrow() != 0 {
-		t.Error("Invalid k8s object type did not get dropped")
-	}
-}
-
-func Test_filter_valid_csv_records(t *testing.T) {
-	usage_data := []UsageData{
-		// k8s object with missing data
-		{
-			"2023-02-01 00:00:00 +0000 UTC", "2023-03-01 00:00:00 +0000 UTC", "2023-06-02 00:00:01 +0000 UTC", "2023-06-02 00:15:00 +0000 UTC",
-			"Yuptoo-service", "Yuptoo-app-standalone-1", "Yuptoo-app", "ReplicaSet", "testdeployment", "deployment", "Yuptoo-prod",
-			"quay.io/cloudservices/yuptoo", "ip-10-0-176-227.us-east-2.compute.internal", "i-0dfbb3fa4d0e8fc94",
-			"1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "",
-		},
-		{
-			"2023-02-01 00:00:00 +0000 UTC", "2023-03-01 00:00:00 +0000 UTC", "2023-06-02 00:00:01 +0000 UTC", "2023-06-02 00:15:00 +0000 UTC",
-			"Yuptoo-service", "Yuptoo-app-standalone-1", "Yuptoo-app", "ReplicaSet", "testdeployment", "deployment", "Yuptoo-prod",
-			"quay.io/cloudservices/yuptoo", "ip-10-0-176-227.us-east-2.compute.internal", "i-0dfbb3fa4d0e8fc94",
-			"1", "1", "1", "1", "", "", "", "", "1", "1", "1", "1", "1", "1", "1", "", "", "", "", "", "", "", "",
-		},
-		// k8s object with 0 CPU, Memory and RSS usage
-		{
-			"2023-02-01 00:00:00 +0000 UTC", "2023-03-01 00:00:00 +0000 UTC", "2023-06-02 00:00:01 +0000 UTC", "2023-06-02 00:15:00 +0000 UTC",
-			"Yuptoo-service", "Yuptoo-app-standalone-1", "Yuptoo-app", "ReplicaSet", "testdeployment", "deployment", "Yuptoo-prod",
-			"quay.io/cloudservices/yuptoo", "ip-10-0-176-227.us-east-2.compute.internal", "i-0dfbb3fa4d0e8fc94",
-			"1", "1", "1", "1", "0", "0", "0", "0", "1", "1", "1", "1", "1", "1", "1", "0", "0", "0", "0", "0", "0", "0", "0",
-		},
-	}
-	df := dataframe.LoadStructs(usage_data)
-	df = determine_k8s_object_type(df)
-	result, no_of_dropped_records := filter_valid_csv_records(df)
-	if result.Nrow() != 1 || no_of_dropped_records != 2 {
 		t.Error("Invalid k8s object type did not get dropped")
 	}
 

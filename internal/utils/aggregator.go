@@ -34,9 +34,6 @@ func Aggregate_data(df dataframe.DataFrame) (dataframe.DataFrame, error) {
 
 	df = determine_k8s_object_type(df)
 
-	// filter out only valid workload type
-	df = filter_valid_k8s_object_types(df)
-
 	dfGroups := df.GroupBy(
 		"namespace",
 		"k8s_object_type",
@@ -104,17 +101,8 @@ func filter_valid_csv_records(main_df dataframe.DataFrame) (dataframe.DataFrame,
 		dataframe.F{Colname: "owner_name", Comparator: series.Neq, Comparando: ""},
 		dataframe.F{Colname: "owner_kind", Comparator: series.Neq, Comparando: "<none>"},
 		dataframe.F{Colname: "owner_name", Comparator: series.Neq, Comparando: "<none>"},
-	)
-
-	no_of_dropped_records := main_df.Nrow() - df.Nrow()
-
-	return df, no_of_dropped_records
-}
-
-func filter_valid_k8s_object_types(df dataframe.DataFrame) dataframe.DataFrame {
-	return df.Filter(
 		dataframe.F{
-			Colname:    "k8s_object_type",
+			Colname:    "workload_type",
 			Comparator: series.In,
 			Comparando: []string{
 				w.Daemonset.String(),
@@ -125,6 +113,10 @@ func filter_valid_k8s_object_types(df dataframe.DataFrame) dataframe.DataFrame {
 				w.Statefulset.String(),
 			}},
 	)
+
+	no_of_dropped_records := main_df.Nrow() - df.Nrow()
+
+	return df, no_of_dropped_records
 }
 
 func determine_k8s_object_type(df dataframe.DataFrame) dataframe.DataFrame {
