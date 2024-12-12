@@ -31,7 +31,6 @@ func Aggregate_data(df dataframe.DataFrame) (dataframe.DataFrame, error) {
 	if df.Nrow() == 0 {
 		return df, fmt.Errorf("no valid records present in CSV to process further")
 	}
-
 	df = determine_k8s_object_type(df)
 
 	dfGroups := df.GroupBy(
@@ -101,6 +100,27 @@ func filter_valid_csv_records(main_df dataframe.DataFrame) (dataframe.DataFrame,
 		dataframe.F{Colname: "owner_name", Comparator: series.Neq, Comparando: ""},
 		dataframe.F{Colname: "owner_kind", Comparator: series.Neq, Comparando: "<none>"},
 		dataframe.F{Colname: "owner_name", Comparator: series.Neq, Comparando: "<none>"},
+		dataframe.F{Colname: "workload_type", Comparator: series.Neq, Comparando: "<none>"},
+		dataframe.F{Colname: "workload_type", Comparator: series.Neq, Comparando: ""},
+	)
+
+	// Change the case of all workload_type to lowercase
+	lcase_workload_types := df.Rapply(func(s series.Series) series.Series {
+		columns := df.Names()
+		index_of_workload_type := findInStringSlice("workload_type", columns)
+		workload_type := s.Elem(index_of_workload_type).String()
+		lcase_workload_type := strings.ToLower(workload_type)
+		return series.Strings([]string{lcase_workload_type, workload_type})
+	})
+
+	// Delete existing workload_type column
+	df = df.Mutate(df.Col("workload_type")).Drop("workload_type")
+
+	// Rename lowercase converted column to workload_type
+	df = df.Mutate(lcase_workload_types.Col("X0")).Rename("workload_type", "X0")
+
+	df = df.FilterAggregation(
+		dataframe.And,
 		dataframe.F{
 			Colname:    "workload_type",
 			Comparator: series.In,
