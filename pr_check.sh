@@ -49,7 +49,7 @@ for ((i=1; i<=retries; i++)); do
         break
     else
         echo "Failed to create the performance profile! Waiting for 10 seconds, then retry"
-        sleep 10
+        sleep 3
     fi
 
     if [[ $i == $retries ]]; then
