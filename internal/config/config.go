@@ -73,6 +73,10 @@ type Config struct {
 
 	// Namespace recommendation config
 	DisableNamespaceRecommendation bool `mapstructure:"DISABLE_NAMESPACE_RECOMMENDATION"`
+
+	// MCP server config (exposes ROS API as MCP tools for agents)
+	MCPPort       string `mapstructure:"MCP_PORT"`
+	ROSAPIBaseURL string `mapstructure:"ROS_API_BASE_URL"` // Base URL of the ROS REST API (for MCP to call)
 }
 
 var cfg *Config = nil
@@ -195,6 +199,10 @@ func initConfig() {
 	viper.SetDefault("RECORD_LIMIT_CSV", 1000)
 	viper.SetDefault("CSV_STREAM_INTERVAL", 100)
 	viper.SetDefault("DISABLE_NAMESPACE_RECOMMENDATION", true)
+
+	// MCP server (exposes ROS API as MCP tools; requires X-Rh-Identity on each request)
+	viper.SetDefault("MCP_PORT", "8090")
+	viper.SetDefault("ROS_API_BASE_URL", "http://localhost:8000")
 
 	// Hack till viper issue get fix - https://github.com/spf13/viper/issues/761
 	envKeysMap := &map[string]interface{}{}

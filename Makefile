@@ -71,6 +71,10 @@ run-recommendation-poller:
 run-api-server:
 	PROMETHEUS_PORT=5007 go run rosocp.go start api
 
+.PHONY: run-mcp-server
+run-mcp-server:
+	go run rosocp.go start mcp
+
 .PHONY: build
 build:
 	go build -o bin/rosocp rosocp.go
@@ -110,10 +114,10 @@ else
 endif
 
 upload-msg-to-rosocp:
-	echo ${ros_ocp_msg} | docker-compose -f scripts/docker-compose.yml exec -T kafka kafka-console-producer --topic hccm.ros.events  --broker-list localhost:29092
+	echo ${ros_ocp_msg} | docker compose -f scripts/docker-compose.yml exec -T kafka kafka-console-producer --topic hccm.ros.events  --broker-list localhost:29092
 
 upload-msg-to-rosocp-24Hrs:
-	echo ${ros_ocp_msg_24Hrs} | docker-compose -f scripts/docker-compose.yml exec -T kafka kafka-console-producer --topic hccm.ros.events  --broker-list localhost:29092
+	echo ${ros_ocp_msg_24Hrs} | docker compose -f scripts/docker-compose.yml exec -T kafka kafka-console-producer --topic hccm.ros.events  --broker-list localhost:29092
 
 
 get-recommendations:

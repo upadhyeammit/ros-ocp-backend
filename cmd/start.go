@@ -2,12 +2,15 @@ package cmd
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/spf13/cobra"
 
 	"github.com/redhatinsights/ros-ocp-backend/internal/api"
 	"github.com/redhatinsights/ros-ocp-backend/internal/config"
 	"github.com/redhatinsights/ros-ocp-backend/internal/kafka"
+	"github.com/redhatinsights/ros-ocp-backend/internal/logging"
+	"github.com/redhatinsights/ros-ocp-backend/internal/mcp"
 	"github.com/redhatinsights/ros-ocp-backend/internal/services"
 	"github.com/redhatinsights/ros-ocp-backend/internal/services/housekeeper"
 	"github.com/redhatinsights/ros-ocp-backend/internal/utils"
@@ -63,6 +66,24 @@ var houseKeeperCmd = &cobra.Command{
 	},
 }
 
+var mcpCmd = &cobra.Command{
+	Use:   "mcp",
+	Short: "starts ros-ocp MCP server (exposes REST API as MCP tools for agents)",
+	Run: func(cmd *cobra.Command, args []string) {
+		cfg := config.GetConfig()
+		port := cfg.MCPPort
+		if port == "" {
+			port = "8090"
+		}
+		handler := mcp.NewStreamableHTTPHandler(cfg)
+		log := logging.GetLogger()
+		log.Infof("ROS OCP MCP server listening on :%s (Streamable HTTP); send X-Rh-Identity for user-scoped data", port)
+		if err := http.ListenAndServe(":"+port, handler); err != nil {
+			log.Fatal(err)
+		}
+	},
+}
+
 var sources, partitions bool
 
 func init() {
@@ -71,6 +92,7 @@ func init() {
 	startCmd.AddCommand(recommendationPollerCmd)
 	startCmd.AddCommand(apiCmd)
 	startCmd.AddCommand(houseKeeperCmd)
+	startCmd.AddCommand(mcpCmd)
 
 	houseKeeperCmd.Flags().BoolVar(&sources, "sources", false, "starts sources listener service")
 	houseKeeperCmd.Flags().BoolVar(&partitions, "partitions", false, "deletes older partitions")
