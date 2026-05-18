@@ -17,6 +17,7 @@ require (
 	github.com/lib/pq v1.12.3
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/prometheus/client_golang v1.23.2
+	github.com/prometheus/client_model v0.6.2
 	github.com/redhatinsights/app-common-go v1.6.9
 	github.com/redhatinsights/platform-go-middlewares v1.0.0
 	github.com/sirupsen/logrus v1.9.4
@@ -74,6 +75,9 @@ require (
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/klauspost/compress v1.18.2 // indirect
 	github.com/labstack/gommon v0.5.0 // indirect
+	github.com/kylelemons/godebug v1.1.0 // indirect
+	github.com/labstack/gommon v0.4.2 // indirect
+ 9b24c5e (Fix plugin fallback parity, retention/API wiring, and env bridge semantics.)
 	github.com/launchdarkly/eventsource v1.10.0 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 // indirect
@@ -98,7 +102,6 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/power-devops/perfstat v0.0.0-20240221224432-82ca36839d55 // indirect
-	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/common v0.67.5 // indirect
 	github.com/prometheus/procfs v0.19.2 // indirect
 	github.com/sagikazarmark/locafero v0.12.0 // indirect
