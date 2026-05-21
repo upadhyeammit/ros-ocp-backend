@@ -10,6 +10,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/redhatinsights/ros-ocp-backend/internal/model"
+	"github.com/stretchr/testify/assert"
 	"gorm.io/datatypes"
 )
 
@@ -349,4 +350,28 @@ func TestJSONvsCSVCPULimitAmount(t *testing.T) {
 			t.Errorf("amount=%v: CPU limit mismatch: csv=%q json=%q", amount, rows[0][9], jsonAmount)
 		}
 	}
+}
+
+func TestNamespaceAPIErrf_UserErrFlag(t *testing.T) {
+	t.Run("EnableUserAPIErr=false produces ParamError with UserErr=false", func(t *testing.T) {
+		pe := namespaceAPIErrf(false, "test error %s", "value")
+		assert.False(t, pe.UserErr)
+		assert.Contains(t, pe.Error(), "test error value")
+	})
+
+	t.Run("EnableUserAPIErr=true produces ParamError with UserErr=true", func(t *testing.T) {
+		pe := namespaceAPIErrf(true, "visible %d", 42)
+		assert.True(t, pe.UserErr)
+		assert.Contains(t, pe.Error(), "visible 42")
+	})
+
+	t.Run("ParamError unwraps correctly", func(t *testing.T) {
+		pe := namespaceAPIErrf(false, "inner error")
+		assert.Equal(t, pe.AppErr, pe.Unwrap())
+	})
+
+	t.Run("EnableUserAPIErr constant is false", func(t *testing.T) {
+		assert.False(t, EnableUserAPIErr,
+			"EnableUserAPIErr should be false; flip requires audit of all user-facing error surfaces")
+	})
 }
