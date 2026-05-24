@@ -1753,7 +1753,7 @@
       "get": {
         "tags": ["Node Recommendations"],
         "summary": "Get node CPU and memory utilization recommendations",
-        "description": "Returns Tier-1 node utilization recommendations: CPU/memory p50/p95, overcommit ratio, underutilized / overcommitted flags, stranded-resource hints, and trend slope.",
+        "description": "Returns Tier-1 node utilization recommendations. Each node appears once with shared classification/metrics and nested `recommendation_terms.<term>.recommendation_engines.{cost,performance}` (mirrors container recommendations). Pagination counts distinct nodes. Default sort: `order_by=estimated_monthly_savings_usd&order_how=desc` using the cost engine medium-term savings (or the filtered engine when `?engine=` is set).",
         "operationId": "getNodeUtilizationRecommendations",
         "x-plugin-required": "node",
         "parameters": [
@@ -1773,6 +1773,12 @@
             "schema": { "type": "string" }
           },
           {
+            "name": "engine",
+            "in": "query",
+            "schema": { "type": "string", "enum": ["cost", "performance"] },
+            "description": "Include only this engine in `recommendation_engines`. When omitted, both cost and performance are returned."
+          },
+          {
             "name": "is_underutilized",
             "in": "query",
             "schema": { "type": "string", "enum": ["true", "false"] }
@@ -1781,6 +1787,21 @@
             "name": "is_overcommitted",
             "in": "query",
             "schema": { "type": "string", "enum": ["true", "false"] }
+          },
+          {
+            "name": "order_by",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["estimated_monthly_savings_usd", "node"],
+              "default": "estimated_monthly_savings_usd"
+            },
+            "description": "Sort paginated nodes by medium-term savings (cost engine by default, or the filtered engine) or node name."
+          },
+          {
+            "name": "order_how",
+            "in": "query",
+            "schema": { "type": "string", "enum": ["asc", "desc"], "default": "desc" }
           },
           {
             "name": "limit",
@@ -1834,6 +1855,12 @@
             "schema": { "type": "string" }
           },
           {
+            "name": "engine",
+            "in": "query",
+            "schema": { "type": "string", "enum": ["cost", "performance"] },
+            "description": "Include only this engine in `recommendation_engines`. When omitted, both cost and performance are returned."
+          },
+          {
             "name": "is_underutilized",
             "in": "query",
             "schema": { "type": "string", "enum": ["true", "false"] }
@@ -1842,6 +1869,20 @@
             "name": "is_overcommitted",
             "in": "query",
             "schema": { "type": "string", "enum": ["true", "false"] }
+          },
+          {
+            "name": "order_by",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["estimated_monthly_savings_usd", "node"],
+              "default": "estimated_monthly_savings_usd"
+            }
+          },
+          {
+            "name": "order_how",
+            "in": "query",
+            "schema": { "type": "string", "enum": ["asc", "desc"], "default": "desc" }
           },
           {
             "name": "limit",
@@ -1866,6 +1907,35 @@
           "400": { "description": "Bad request" },
           "403": { "description": "User is not authorized (RBAC)" },
           "503": { "description": "Service unavailable" }
+        }
+      }
+    },
+    "/recommendations/openshift/savings-summary": {
+      "get": {
+        "tags": ["Fleet Summary"],
+        "summary": "Get fleet-level savings summary",
+        "description": "Returns aggregated estimated monthly savings across all clusters for the authenticated organization. Sums persisted savings from container, node, PVC, and snapshot recommendations at medium term. Container and node totals honor the optional `engine` query parameter (default `cost`). GPU savings are computed at API read time and are excluded (see `gpu_savings_note`).",
+        "operationId": "getFleetSavingsSummary",
+        "parameters": [
+          {
+            "name": "engine",
+            "in": "query",
+            "schema": { "type": "string", "enum": ["cost", "performance"], "default": "cost" },
+            "description": "Recommendation engine profile for container and node savings aggregation. Defaults to `cost` for backwards compatibility."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Fleet savings summary",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/FleetSavingsSummaryResponse" }
+              }
+            }
+          },
+          "400": { "description": "Invalid engine parameter" },
+          "403": { "description": "User is not authorized (RBAC)" },
+          "503": { "description": "Service unavailable due to a database error" }
         }
       }
     },
@@ -1999,7 +2069,12 @@
                       "properties": {
                         "count": { "type": "integer" },
                         "limit": { "type": "integer" },
-                        "offset": { "type": "integer" }
+                        "offset": { "type": "integer" },
+                        "currency": {
+                          "type": "string",
+                          "description": "ISO 4217 currency code for cost fields (from Koku cost model). Defaults to USD.",
+                          "example": "USD"
+                        }
                       }
                     },
                     "data": {
@@ -2274,6 +2349,11 @@
             "type": "string",
             "format": "date-time",
             "example": "2026-01-18T15:48:54.000Z"
+          },
+          "currency": {
+            "type": "string",
+            "description": "ISO 4217 currency code for monetary fields (from Koku cost model). Defaults to USD.",
+            "example": "USD"
           },
           "recommendations": {
             "$ref": "#/components/schemas/DetailRecommendations"
@@ -3504,6 +3584,11 @@
             "nullable": true,
             "description": "Estimated monthly savings if GPU time-slicing is enabled on the node. Represents this container's share (savings_per_gpu from the node recommendation). Only set for time-slicing candidate containers with cost data available."
           },
+          "currency": {
+            "type": "string",
+            "description": "ISO 4217 currency code for GPU savings fields (from Koku cost model). Defaults to USD.",
+            "example": "USD"
+          },
           "notifications": {
             "type": "array",
             "items": { "type": "integer" },
@@ -3536,6 +3621,11 @@
             "type": "array",
             "items": { "type": "string" },
             "description": "Optional warnings about degraded data quality (e.g., GPU enrichment failures, scan errors)"
+          },
+          "currency": {
+            "type": "string",
+            "description": "ISO 4217 currency code for savings fields (from Koku cost model). Defaults to USD.",
+            "example": "USD"
           }
         }
       },
@@ -3674,9 +3764,60 @@
       "NodeUtilizationMeta": {
         "type": "object",
         "properties": {
-          "count": { "type": "integer" },
+          "count": { "type": "integer", "description": "Total distinct nodes matching filters" },
           "limit": { "type": "integer" },
-          "offset": { "type": "integer" }
+          "offset": { "type": "integer" },
+          "currency": {
+            "type": "string",
+            "description": "ISO 4217 currency code for savings fields (from Koku cost model). Defaults to USD.",
+            "example": "USD"
+          }
+        }
+      },
+      "NodeUtilizationClassification": {
+        "type": "object",
+        "properties": {
+          "is_underutilized": { "type": "boolean" },
+          "is_overcommitted": { "type": "boolean" },
+          "stranded_resource": { "type": "string", "nullable": true }
+        }
+      },
+      "NodeUtilizationMetrics": {
+        "type": "object",
+        "properties": {
+          "cpu_util_p50": { "type": "number", "format": "float" },
+          "cpu_util_p95": { "type": "number", "format": "float" },
+          "mem_util_p50": { "type": "number", "format": "float" },
+          "mem_util_p95": { "type": "number", "format": "float" }
+        }
+      },
+      "NodeUtilizationEngineRec": {
+        "type": "object",
+        "properties": {
+          "recommended_cpu_cores": { "type": "number", "format": "float" },
+          "recommended_memory_gib": { "type": "number", "format": "float" },
+          "node_count_reduction": { "type": "integer" },
+          "estimated_monthly_savings_usd": {
+            "type": "number",
+            "format": "float",
+            "nullable": true,
+            "description": "Estimated monthly savings from right-sizing node CPU/memory capacity. Null or zero with notification code 25 (NO_COST_DATA) when Masu effective_rates is unavailable."
+          },
+          "notifications": { "type": "object", "additionalProperties": true },
+          "updated_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "NodeUtilizationEngines": {
+        "type": "object",
+        "properties": {
+          "cost": { "$ref": "#/components/schemas/NodeUtilizationEngineRec" },
+          "performance": { "$ref": "#/components/schemas/NodeUtilizationEngineRec" }
+        }
+      },
+      "NodeUtilizationTermRec": {
+        "type": "object",
+        "properties": {
+          "recommendation_engines": { "$ref": "#/components/schemas/NodeUtilizationEngines" }
         }
       },
       "NodeUtilizationRec": {
@@ -3684,20 +3825,50 @@
         "properties": {
           "node": { "type": "string" },
           "cluster_uuid": { "type": "string" },
-          "term": { "type": "string" },
-          "cpu_utilization_p50": { "type": "number", "format": "float" },
-          "cpu_utilization_p95": { "type": "number", "format": "float" },
-          "memory_utilization_p50": { "type": "number", "format": "float" },
-          "memory_utilization_p95": { "type": "number", "format": "float" },
-          "cpu_overcommit_ratio": { "type": "number", "format": "float" },
-          "is_underutilized": { "type": "boolean" },
-          "is_overcommitted": { "type": "boolean" },
-          "stranded_resource": { "type": "string", "nullable": true },
-          "pod_count": { "type": "integer", "format": "int64" },
-          "trend_slope": { "type": "number", "format": "float" },
           "recommendation_type": { "type": "string", "example": "cpu_memory_utilization" },
-          "notifications": { "type": "object", "additionalProperties": true },
-          "updated_at": { "type": "string", "format": "date-time" }
+          "classification": { "$ref": "#/components/schemas/NodeUtilizationClassification" },
+          "metrics": { "$ref": "#/components/schemas/NodeUtilizationMetrics" },
+          "pod_count": { "type": "integer", "format": "int64" },
+          "cpu_overcommit_ratio": { "type": "number", "format": "float" },
+          "trend_slope": { "type": "number", "format": "float" },
+          "recommendation_terms": {
+            "type": "object",
+            "additionalProperties": { "$ref": "#/components/schemas/NodeUtilizationTermRec" },
+            "description": "Keys are `short_term`, `medium_term`, and `long_term`."
+          }
+        }
+      },
+      "FleetSavingsSummaryResponse": {
+        "type": "object",
+        "description": "Aggregated estimated monthly savings across all clusters for the organization.",
+        "properties": {
+          "currency": { "type": "string", "example": "USD" },
+          "total_estimated_monthly_savings_usd": { "type": "number", "format": "float" },
+          "by_cluster": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/FleetClusterSavings" }
+          },
+          "by_plugin": { "$ref": "#/components/schemas/FleetSavingsByPlugin" },
+          "gpu_savings_note": { "type": "string" }
+        }
+      },
+      "FleetClusterSavings": {
+        "type": "object",
+        "properties": {
+          "cluster_uuid": { "type": "string" },
+          "cluster_alias": { "type": "string" },
+          "savings": { "type": "number", "format": "float" },
+          "has_cost_data": { "type": "boolean" }
+        }
+      },
+      "FleetSavingsByPlugin": {
+        "type": "object",
+        "properties": {
+          "container": { "type": "number", "format": "float" },
+          "gpu": { "type": "number", "format": "float" },
+          "node": { "type": "number", "format": "float" },
+          "pvc": { "type": "number", "format": "float" },
+          "snapshot": { "type": "number", "format": "float" }
         }
       },
       "FleetSummaryResponse": {
@@ -3728,6 +3899,11 @@
           "cluster_count": {
             "type": "integer",
             "description": "Number of distinct clusters with recommendations"
+          },
+          "currency": {
+            "type": "string",
+            "description": "ISO 4217 currency code for savings fields (from Koku cost model). Defaults to USD.",
+            "example": "USD"
           }
         }
       },
@@ -3793,6 +3969,12 @@
           "resize_note": {
             "type": "string",
             "description": "Operational guidance for acting on the recommendation (e.g., Kubernetes does not support in-place PVC shrinking)"
+          },
+          "estimated_monthly_savings_usd": {
+            "type": "number",
+            "format": "float",
+            "nullable": true,
+            "description": "Estimated monthly savings from right-sizing PVC capacity. Null or zero with notification code 25 (NO_COST_DATA) when Masu effective_rates is unavailable."
           }
         }
       },
@@ -3805,7 +3987,12 @@
             "properties": {
               "count": { "type": "integer", "description": "Number of results in this page" },
               "limit": { "type": "integer", "description": "Maximum results per page" },
-              "offset": { "type": "integer", "description": "Number of results skipped" }
+              "offset": { "type": "integer", "description": "Number of results skipped" },
+              "currency": {
+                "type": "string",
+                "description": "ISO 4217 currency code for savings fields (from Koku cost model). Defaults to USD.",
+                "example": "USD"
+              }
             }
           },
           "data": {
