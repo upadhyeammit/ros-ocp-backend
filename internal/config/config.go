@@ -229,6 +229,7 @@ type Config struct {
 	// Tag sync (Koku → ROS resolved tags on org_container_keys).
 	// Disabled by default; enable with ROS_TAGS_ENABLED=true.
 	TagsEnabled                bool   `mapstructure:"ROS_TAGS_ENABLED"`
+	TagsSource                 string `mapstructure:"ROS_TAGS_SOURCE"`
 	TagsAllowedServiceAccounts string `mapstructure:"ROS_TAGS_ALLOWED_SERVICE_ACCOUNTS"`
 	TagsDevToken               string `mapstructure:"ROS_TAGS_DEV_TOKEN"`
 
@@ -471,6 +472,7 @@ func initConfig() {
 	viper.SetDefault("ROS_SNAPSHOT_INVENTORY_RETENTION_HOURS", 48)
 	viper.SetDefault("ROS_SNAPSHOT_STALE_GRACE_HOURS", 48)
 	viper.SetDefault("ROS_TAGS_ENABLED", false)
+	viper.SetDefault("ROS_TAGS_SOURCE", "db")
 
 	// Unleash config
 	viper.SetDefault("UnleashClientAccessToken", "rosocp:dev.token")
