@@ -2532,15 +2532,31 @@
               "default": "cost"
             },
             "description": "Recommendation engine profile for container and node savings aggregation. Defaults to `cost` for backwards compatibility."
+          },
+          {
+            "name": "group_by[tag:environment]",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "When `ROS_TAGS_ENABLED=true`, group container savings by the given tag key (value is ignored, e.g. `*`). Flat form: `group_by=tag:environment`. Returns `FleetSavingsByTagResponse` instead of the default fleet summary shape. Ignored when tag filtering is disabled."
           }
         ],
         "responses": {
           "200": {
-            "description": "Fleet savings summary",
+            "description": "Fleet savings summary, or tag-grouped savings when `group_by[tag:key]` is present",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FleetSavingsSummaryResponse"
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/FleetSavingsSummaryResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/FleetSavingsByTagResponse"
+                    }
+                  ]
                 }
               }
             }
@@ -5101,6 +5117,13 @@
           },
           "offset": {
             "type": "integer"
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Optional hints when tag filters yield no results or sync/catalog issues are detected"
           }
         }
       },
@@ -5182,6 +5205,13 @@
           },
           "offset": {
             "type": "integer"
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Optional hints when tag filters yield no results or sync/catalog issues are detected"
           },
           "currency": {
             "type": "string",
@@ -5375,6 +5405,40 @@
           }
         }
       },
+      "FleetSavingsByTagResponse": {
+        "type": "object",
+        "description": "Container savings grouped by a single tag key (GET savings-summary with group_by[tag:key]).",
+        "properties": {
+          "meta": {
+            "type": "object",
+            "properties": {
+              "count": {
+                "type": "integer",
+                "description": "Number of distinct tag values (including null for workloads without the key)"
+              }
+            }
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FleetTagSavingsRow"
+            }
+          }
+        }
+      },
+      "FleetTagSavingsRow": {
+        "type": "object",
+        "properties": {
+          "tag_value": {
+            "type": "string",
+            "nullable": true,
+            "description": "Tag value from org_container_keys.resolved_tags; null when the key is absent"
+          },
+          "estimated_monthly_savings": {
+            "$ref": "#/components/schemas/SavingsObject"
+          }
+        }
+      },
       "FleetSavingsByPlugin": {
         "type": "object",
         "properties": {
@@ -5548,6 +5612,13 @@
                 "type": "string",
                 "description": "ISO 4217 currency code for savings fields (from Koku cost model). Defaults to USD.",
                 "example": "USD"
+              },
+              "warnings": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Optional hints when tag filters yield no results or sync/catalog issues are detected"
               }
             }
           },
