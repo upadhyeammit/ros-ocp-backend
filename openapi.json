@@ -2534,11 +2534,10 @@
           "replicas": {
             "$ref": "#/components/schemas/ReplicaInfo"
           },
-          "estimated_monthly_savings_usd": {
-            "type": "number",
-            "format": "float",
+          "estimated_monthly_savings": {
+            "$ref": "#/components/schemas/SavingsObject",
             "nullable": true,
-            "description": "Estimated total monthly savings across all resource types (CPU, memory) in USD"
+            "description": "Estimated total monthly savings across all resource types (CPU, memory)"
           },
           "monitoring_end_time": {
             "type": "string",
@@ -3588,7 +3587,7 @@
           "rec_memory_limit_kib": { "type": "integer", "nullable": true },
           "notification_codes": { "type": "array", "items": { "type": "integer" }, "nullable": true },
           "confidence_level": { "type": "number", "format": "float", "nullable": true },
-          "estimated_monthly_savings_usd": { "type": "number", "format": "float", "nullable": true }
+          "estimated_monthly_savings": { "$ref": "#/components/schemas/SavingsObject", "nullable": true }
         }
       },
       "QualityList": {
@@ -3953,12 +3952,29 @@
           }
         }
       },
+      "SavingsObject": {
+        "type": "object",
+        "description": "Structured monthly savings amount with six-decimal string value and ISO currency units.",
+        "properties": {
+          "value": {
+            "type": "string",
+            "description": "Savings amount as a decimal string with six fractional digits",
+            "example": "12.340000"
+          },
+          "units": {
+            "type": "string",
+            "description": "ISO currency code from the cost model",
+            "example": "USD"
+          }
+        },
+        "required": ["value", "units"]
+      },
       "FleetSavingsSummaryResponse": {
         "type": "object",
         "description": "Aggregated estimated monthly savings across all clusters for the organization.",
         "properties": {
           "currency": { "type": "string", "example": "USD" },
-          "total_estimated_monthly_savings_usd": { "type": "number", "format": "float" },
+          "estimated_monthly_savings": { "$ref": "#/components/schemas/SavingsObject" },
           "by_cluster": {
             "type": "array",
             "items": { "$ref": "#/components/schemas/FleetClusterSavings" }
@@ -3972,7 +3988,7 @@
         "properties": {
           "cluster_uuid": { "type": "string" },
           "cluster_alias": { "type": "string" },
-          "savings": { "type": "number", "format": "float" },
+          "estimated_monthly_savings": { "$ref": "#/components/schemas/SavingsObject" },
           "has_cost_data": { "type": "boolean" }
         }
       },
