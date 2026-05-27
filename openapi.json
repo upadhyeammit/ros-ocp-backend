@@ -376,6 +376,16 @@
               "type": "string"
             },
             "example": "environment:production"
+          },
+          {
+            "name": "filter[idle_state]",
+            "in": "query",
+            "description": "Comma-separated idle states to include: active, idle, zombie. Example: zombie,idle",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "zombie,idle"
+            }
           }
         ],
         "responses": {
@@ -2541,6 +2551,15 @@
               "type": "string"
             },
             "description": "When `ROS_TAGS_ENABLED=true`, group container savings by the given tag key (value is ignored, e.g. `*`). Flat form: `group_by=tag:environment`. Returns `FleetSavingsByTagResponse` instead of the default fleet summary shape. Ignored when tag filtering is disabled."
+          },
+          {
+            "name": "group_by[idle_state]",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Group fleet waste by idle_state (value is ignored, e.g. `*`). Returns FleetSavingsByIdleStateResponse instead of the default fleet summary shape."
           }
         ],
         "responses": {
@@ -2555,6 +2574,9 @@
                     },
                     {
                       "$ref": "#/components/schemas/FleetSavingsByTagResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/FleetSavingsByIdleStateResponse"
                     }
                   ]
                 }
@@ -3382,6 +3404,96 @@
           }
         }
       }
+    },
+    "/recommendations/openshift/settings/idle-detection": {
+      "get": {
+        "tags": [
+          "Idle Detection Settings"
+        ],
+        "summary": "Get idle detection settings",
+        "operationId": "getIdleDetectionSettings",
+        "responses": {
+          "200": {
+            "description": "Current idle detection settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdleDetectionSettingsResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User is not authorized (RBAC)"
+          },
+          "503": {
+            "description": "Service unavailable"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Idle Detection Settings"
+        ],
+        "summary": "Update idle detection settings",
+        "operationId": "putIdleDetectionSettings",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IdleDetectionSettingsUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated idle detection settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdleDetectionSettingsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error"
+          },
+          "403": {
+            "description": "Forbidden (locked fields or RBAC)"
+          },
+          "503": {
+            "description": "Service unavailable"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Idle Detection Settings"
+        ],
+        "summary": "Reset idle detection settings",
+        "operationId": "deleteIdleDetectionSettings",
+        "responses": {
+          "200": {
+            "description": "Defaults restored",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdleDetectionSettingsResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User is not authorized (RBAC)"
+          },
+          "503": {
+            "description": "Service unavailable"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -3495,6 +3607,42 @@
                 "gpu_confidence": 0.85
               }
             }
+          },
+          "idle_state": {
+            "type": "string",
+            "enum": [
+              "active",
+              "idle",
+              "zombie"
+            ],
+            "description": "Workload activity classification. Always present; defaults to active."
+          },
+          "idle_since": {
+            "type": "string",
+            "format": "date",
+            "description": "First day classified non-active (YYYY-MM-DD)."
+          },
+          "idle_duration_days": {
+            "type": "integer",
+            "description": "Days in current idle_state."
+          },
+          "peak_cpu_millicores": {
+            "type": "integer",
+            "description": "Peak CPU usage (millicores) over observation window."
+          },
+          "peak_memory_bytes": {
+            "type": "integer",
+            "description": "Peak memory usage (bytes) over observation window."
+          },
+          "estimated_monthly_waste": {
+            "$ref": "#/components/schemas/SavingsObject",
+            "nullable": true,
+            "description": "Full terminate opportunity when idle_state is idle or zombie."
+          },
+          "idle_recommendation": {
+            "$ref": "#/components/schemas/IdleRecommendation",
+            "nullable": true,
+            "description": "Terminate guidance when idle_state is idle or zombie."
           }
         }
       },
@@ -5643,6 +5791,154 @@
             "type": "array",
             "items": {
               "type": "object"
+            }
+          }
+        }
+      },
+      "IdleRecommendation": {
+        "type": "object",
+        "required": [
+          "action",
+          "confidence",
+          "reason"
+        ],
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "terminate"
+            ]
+          },
+          "confidence": {
+            "type": "string",
+            "enum": [
+              "medium",
+              "high"
+            ]
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "IdleDetectionThresholds": {
+        "type": "object",
+        "properties": {
+          "cpu_utilization_percent": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50
+          },
+          "memory_utilization_percent": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50
+          },
+          "burst_ratio": {
+            "type": "integer"
+          },
+          "minimum_observation_days": {
+            "type": "integer"
+          },
+          "gpu_sm_active_basis_points": {
+            "type": "integer"
+          },
+          "gpu_dram_active_basis_points": {
+            "type": "integer"
+          }
+        }
+      },
+      "IdleDetectionExclusions": {
+        "type": "object",
+        "properties": {
+          "namespaces": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "workload_types": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "IdleDetectionSettings": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "thresholds": {
+            "$ref": "#/components/schemas/IdleDetectionThresholds"
+          },
+          "exclusions": {
+            "$ref": "#/components/schemas/IdleDetectionExclusions"
+          }
+        }
+      },
+      "IdleDetectionSettingsResponse": {
+        "type": "object",
+        "properties": {
+          "idle_detection": {
+            "$ref": "#/components/schemas/IdleDetectionSettings"
+          },
+          "locked_fields": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "IdleDetectionSettingsUpdate": {
+        "type": "object",
+        "required": [
+          "idle_detection"
+        ],
+        "properties": {
+          "idle_detection": {
+            "$ref": "#/components/schemas/IdleDetectionSettings"
+          }
+        }
+      },
+      "FleetIdleStateSavingsRow": {
+        "type": "object",
+        "properties": {
+          "idle_state": {
+            "type": "string",
+            "enum": [
+              "idle",
+              "zombie"
+            ]
+          },
+          "estimated_monthly_waste": {
+            "$ref": "#/components/schemas/SavingsObject"
+          },
+          "container_count": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "FleetSavingsByIdleStateResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FleetIdleStateSavingsRow"
+            }
+          },
+          "meta": {
+            "type": "object",
+            "properties": {
+              "count": {
+                "type": "integer",
+                "minimum": 0
+              }
             }
           }
         }
