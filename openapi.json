@@ -3219,6 +3219,90 @@
         }
       }
     },
+    "/openshift/namespace/recommendations": {
+      "get": {
+        "tags": [
+          "Namespace Recommendations"
+        ],
+        "summary": "List namespace recommendations (legacy path)",
+        "description": "Legacy v1-compatible path for namespace recommendations. Identical behavior to `/recommendations/openshift/namespaces`.",
+        "operationId": "getNamespaceRecommendationListLegacy",
+        "x-plugin-required": "namespace",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 100,
+              "minimum": 1,
+              "maximum": 1000
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "order_by",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "order_how",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          },
+          {
+            "name": "filter[tag:environment]",
+            "in": "query",
+            "description": "Filter by OpenShift label tag (requires ROS_TAGS_ENABLED=true). Use filter[tag:<key>]=value1,value2 (OR within key; AND across keys). Legacy ?tag=key:value is also accepted. Tag key present only: filter[tag:<key>]=*",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "production"
+          },
+          {
+            "name": "tag",
+            "in": "query",
+            "description": "Legacy tag filter syntax: key:value or key:* (repeatable). Prefer filter[tag:<key>]=value when ROS_TAGS_ENABLED=true.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "environment:production"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of namespace recommendations"
+          },
+          "403": {
+            "description": "User is not authorized (RBAC)"
+          },
+          "404": {
+            "description": "Plugin disabled \u2014 enable the `namespace` plugin via ROS_ENABLED_PLUGINS"
+          },
+          "503": {
+            "description": "Service unavailable due to a database error"
+          }
+        }
+      }
+    },
     "/recommendations/openshift/namespaces": {
       "get": {
         "tags": [
