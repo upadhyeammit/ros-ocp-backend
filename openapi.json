@@ -2946,6 +2946,209 @@
         }
       }
     },
+    "/recommendations/openshift/cluster-quota": {
+      "get": {
+        "tags": [
+          "Cluster Quota Recommendations"
+        ],
+        "summary": "List OpenShift ClusterResourceQuota recommendations",
+        "description": "Returns per-ClusterResourceQuota right-sizing recommendations for the authenticated organization. Compares CRQ hard limits and observed usage against aggregated namespace quota recommendations, then classifies each CRQ as tighten, raise, optimal, or none.",
+        "operationId": "getClusterQuotaRecommendations",
+        "x-plugin-required": "cluster-quota",
+        "parameters": [
+          {
+            "name": "filter[cluster]",
+            "in": "query",
+            "description": "Filter by cluster UUID (exact match)",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "filter[cluster_quota_name]",
+            "in": "query",
+            "description": "Filter by ClusterResourceQuota name (exact match)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[recommendation_type]",
+            "in": "query",
+            "description": "Filter by recommendation type",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "tighten",
+                "raise",
+                "optimal",
+                "none"
+              ]
+            }
+          },
+          {
+            "name": "filter[risk_level]",
+            "in": "query",
+            "description": "Filter by risk level",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "high",
+                "medium",
+                "low",
+                "none"
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of results (1-100, default 20)",
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Number of results to skip",
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of cluster-quota recommendations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClusterQuotaRecommendationListResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User is not authorized (RBAC)"
+          },
+          "404": {
+            "description": "Plugin disabled — enable the `cluster-quota` plugin via ROS_ENABLED_PLUGINS"
+          },
+          "503": {
+            "description": "Service unavailable due to a database error"
+          }
+        }
+      }
+    },
+    "/recommendations/openshift/settings/cluster-quota": {
+      "get": {
+        "tags": [
+          "Cluster Quota Settings"
+        ],
+        "summary": "Get cluster-quota recommendation settings",
+        "operationId": "getClusterQuotaSettings",
+        "x-plugin-required": "cluster-quota",
+        "responses": {
+          "200": {
+            "description": "Current cluster-quota thresholds (merged defaults, env, and per-org overrides)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClusterQuotaSettingsResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User is not authorized (RBAC)"
+          },
+          "404": {
+            "description": "Plugin disabled — enable the `cluster-quota` plugin via ROS_ENABLED_PLUGINS"
+          },
+          "503": {
+            "description": "Service unavailable"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Cluster Quota Settings"
+        ],
+        "summary": "Update cluster-quota recommendation settings",
+        "operationId": "putClusterQuotaSettings",
+        "x-plugin-required": "cluster-quota",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClusterQuotaSettingsUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated cluster-quota recommendation settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClusterQuotaSettingsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error"
+          },
+          "403": {
+            "description": "Forbidden (locked fields or RBAC)"
+          },
+          "404": {
+            "description": "Plugin disabled"
+          },
+          "503": {
+            "description": "Service unavailable"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Cluster Quota Settings"
+        ],
+        "summary": "Reset cluster-quota recommendation settings",
+        "description": "Removes per-organization overrides; effective values fall back to environment variables or compiled defaults.",
+        "operationId": "deleteClusterQuotaSettings",
+        "x-plugin-required": "cluster-quota",
+        "responses": {
+          "200": {
+            "description": "Defaults restored",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClusterQuotaSettingsResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User is not authorized (RBAC)"
+          },
+          "404": {
+            "description": "Plugin disabled"
+          },
+          "503": {
+            "description": "Service unavailable"
+          }
+        }
+      }
+    },
     "/recommendations/openshift/snapshots": {
       "get": {
         "tags": [
@@ -6403,6 +6606,191 @@
             "minimum": 1,
             "maximum": 99,
             "description": "Must be less than high_risk_threshold_percent"
+          }
+        }
+      },
+      "ClusterQuotaResourceValues": {
+        "type": "object",
+        "properties": {
+          "cpu_request_millicores": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "cpu_limit_millicores": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "memory_request_bytes": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "memory_limit_bytes": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ClusterQuotaUtilizationPercents": {
+        "type": "object",
+        "properties": {
+          "cpu_request_percent": {
+            "type": "integer"
+          },
+          "memory_request_percent": {
+            "type": "integer"
+          }
+        }
+      },
+      "ClusterQuotaCapacityFreed": {
+        "type": "object",
+        "properties": {
+          "cpu_cores_freed": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "memory_bytes": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ClusterQuotaSavingsMonthly": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "integer"
+          },
+          "units": {
+            "type": "string",
+            "example": "USD"
+          }
+        }
+      },
+      "ClusterQuotaRecommendation": {
+        "type": "object",
+        "properties": {
+          "cluster_uuid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "cluster_quota_name": {
+            "type": "string"
+          },
+          "recommendation_type": {
+            "type": "string",
+            "enum": [
+              "tighten",
+              "raise",
+              "optimal",
+              "none"
+            ]
+          },
+          "risk_level": {
+            "type": "string",
+            "enum": [
+              "high",
+              "medium",
+              "low",
+              "none"
+            ]
+          },
+          "quota_hard": {
+            "$ref": "#/components/schemas/ClusterQuotaResourceValues"
+          },
+          "quota_used": {
+            "$ref": "#/components/schemas/ClusterQuotaResourceValues"
+          },
+          "quota_recommended": {
+            "$ref": "#/components/schemas/ClusterQuotaResourceValues"
+          },
+          "utilization": {
+            "$ref": "#/components/schemas/ClusterQuotaUtilizationPercents"
+          },
+          "capacity_freed": {
+            "$ref": "#/components/schemas/ClusterQuotaCapacityFreed"
+          },
+          "estimated_savings": {
+            "$ref": "#/components/schemas/ClusterQuotaSavingsMonthly"
+          }
+        }
+      },
+      "ClusterQuotaRecommendationListResponse": {
+        "type": "object",
+        "properties": {
+          "meta": {
+            "type": "object",
+            "properties": {
+              "count": {
+                "type": "integer"
+              },
+              "limit": {
+                "type": "integer"
+              },
+              "offset": {
+                "type": "integer"
+              }
+            }
+          },
+          "links": {
+            "$ref": "#/components/schemas/Links"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClusterQuotaRecommendation"
+            }
+          }
+        }
+      },
+      "ClusterQuotaSettingsResponse": {
+        "type": "object",
+        "properties": {
+          "headroom_percent": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "high_risk_threshold_percent": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "medium_risk_threshold_percent": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 99
+          },
+          "locked_fields": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Fields locked by ROS_CLUSTER_QUOTA_* environment variables"
+          }
+        }
+      },
+      "ClusterQuotaSettingsUpdate": {
+        "type": "object",
+        "required": [
+          "headroom_percent",
+          "high_risk_threshold_percent",
+          "medium_risk_threshold_percent"
+        ],
+        "properties": {
+          "headroom_percent": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "high_risk_threshold_percent": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "medium_risk_threshold_percent": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 99
           }
         }
       },
