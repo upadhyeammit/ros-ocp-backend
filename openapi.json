@@ -2843,6 +2843,109 @@
         }
       }
     },
+    "/recommendations/openshift/settings/quota": {
+      "get": {
+        "tags": [
+          "Quota Settings"
+        ],
+        "summary": "Get quota recommendation settings",
+        "operationId": "getQuotaSettings",
+        "x-plugin-required": "quota",
+        "responses": {
+          "200": {
+            "description": "Current quota recommendation thresholds (merged defaults, env, and per-org overrides)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuotaSettingsResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User is not authorized (RBAC)"
+          },
+          "404": {
+            "description": "Plugin disabled — enable the `quota` plugin via ROS_ENABLED_PLUGINS"
+          },
+          "503": {
+            "description": "Service unavailable"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Quota Settings"
+        ],
+        "summary": "Update quota recommendation settings",
+        "operationId": "putQuotaSettings",
+        "x-plugin-required": "quota",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuotaSettingsUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated quota recommendation settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuotaSettingsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error"
+          },
+          "403": {
+            "description": "Forbidden (locked fields or RBAC)"
+          },
+          "404": {
+            "description": "Plugin disabled"
+          },
+          "503": {
+            "description": "Service unavailable"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Quota Settings"
+        ],
+        "summary": "Reset quota recommendation settings",
+        "description": "Removes per-organization overrides; effective values fall back to environment variables or compiled defaults.",
+        "operationId": "deleteQuotaSettings",
+        "x-plugin-required": "quota",
+        "responses": {
+          "200": {
+            "description": "Defaults restored",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuotaSettingsResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User is not authorized (RBAC)"
+          },
+          "404": {
+            "description": "Plugin disabled"
+          },
+          "503": {
+            "description": "Service unavailable"
+          }
+        }
+      }
+    },
     "/recommendations/openshift/snapshots": {
       "get": {
         "tags": [
@@ -6243,6 +6346,63 @@
             "items": {
               "type": "string"
             }
+          }
+        }
+      },
+      "QuotaSettingsResponse": {
+        "type": "object",
+        "properties": {
+          "headroom_percent": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Extra margin on recommended hard limits (10 → multiply container rec sums by 1.10)"
+          },
+          "high_risk_threshold_percent": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "description": "Raise recommendation and high risk when max utilization reaches this percent of hard"
+          },
+          "medium_risk_threshold_percent": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 99,
+            "description": "Medium risk when utilization is at or above this percent and below high_risk_threshold_percent"
+          },
+          "locked_fields": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Fields locked by ROS_QUOTA_* environment variables"
+          }
+        }
+      },
+      "QuotaSettingsUpdate": {
+        "type": "object",
+        "required": [
+          "headroom_percent",
+          "high_risk_threshold_percent",
+          "medium_risk_threshold_percent"
+        ],
+        "properties": {
+          "headroom_percent": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "high_risk_threshold_percent": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "description": "Must be greater than medium_risk_threshold_percent"
+          },
+          "medium_risk_threshold_percent": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 99,
+            "description": "Must be less than high_risk_threshold_percent"
           }
         }
       },
