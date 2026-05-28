@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "ROS OCP Backend API",
-    "description": "GO Echo API for Resource Optimization OCP Backend Service.\n\n**Plugin system:** Endpoints are served by plugins that can be individually enabled or disabled via `ROS_ENABLED_PLUGINS` / `ROS_DISABLED_PLUGINS` environment variables. Disabled plugin routes return `404 Not Found`. Available plugins: `container`, `namespace`, `gpu`, `node`, `pvc`, `snapshot`, `kruize`. Default: all native plugins enabled, kruize disabled. See docs/architecture/plugin-architecture.md for details.\n\n**Term configuration:** Recommendation terms (short/medium/long) control the lookback window for each plugin. Terms can be customized per-tenant via PUT /settings/terms. Administrators can lock terms via environment variables (`ROS_TERMS_<PLUGIN>_<TERM>_WINDOW_DAYS`, `ROS_TERMS_<PLUGIN>_<TERM>_MIN_DATA_DAYS`, `ROS_TERMS_<PLUGIN>_<TERM>_DECAY_HALFLIFE_HOURS`). Locked terms cannot be modified by tenants (PUT returns 422). Maximum window_days varies by plugin: 90 for container/namespace/node/gpu, 365 for pvc.",
+    "description": "GO Echo API for Resource Optimization OCP Backend Service.\n\n**Plugin system:** Endpoints are served by plugins that can be individually enabled or disabled via `ROS_ENABLED_PLUGINS` / `ROS_DISABLED_PLUGINS` environment variables. Disabled plugin routes return `404 Not Found`. Available plugins: `container`, `namespace`, `gpu`, `node`, `pvc`, `quota`, `snapshot`, `kruize`. Default: all native plugins enabled, kruize disabled. See docs/architecture/plugin-architecture.md for details.\n\n**Term configuration:** Recommendation terms (short/medium/long) control the lookback window for each plugin. Terms can be customized per-tenant via PUT /settings/terms. Administrators can lock terms via environment variables (`ROS_TERMS_<PLUGIN>_<TERM>_WINDOW_DAYS`, `ROS_TERMS_<PLUGIN>_<TERM>_MIN_DATA_DAYS`, `ROS_TERMS_<PLUGIN>_<TERM>_DECAY_HALFLIFE_HOURS`). Locked terms cannot be modified by tenants (PUT returns 422). Maximum window_days varies by plugin: 90 for container/namespace/node/gpu, 365 for pvc.",
     "version": "v1",
     "license": {
       "name": "GPLv3",
@@ -2719,6 +2719,123 @@
           },
           "403": {
             "description": "User is not authorized (RBAC)"
+          },
+          "503": {
+            "description": "Service unavailable due to a database error"
+          }
+        }
+      }
+    },
+    "/recommendations/openshift/quota": {
+      "get": {
+        "tags": [
+          "Quota Recommendations"
+        ],
+        "summary": "List namespace ResourceQuota recommendations",
+        "description": "Returns per-namespace Kubernetes ResourceQuota right-sizing recommendations for the authenticated organization. Compares configured quota hard limits and observed usage against aggregated container recommendation totals, then classifies each namespace as tighten (reduce over-provisioned quota), raise (usage approaching limits), or optimal. Default sort order is namespace ascending. Use `group_by[cluster]` or `group_by[project]` (not together) for aggregated rows with summed capacity freed and savings.",
+        "operationId": "getQuotaRecommendations",
+        "x-plugin-required": "quota",
+        "parameters": [
+          {
+            "name": "filter[cluster]",
+            "in": "query",
+            "description": "Filter by cluster UUID (exact match)",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "filter[project]",
+            "in": "query",
+            "description": "Filter by namespace (project) name (exact match)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[recommendation_type]",
+            "in": "query",
+            "description": "Filter by recommendation type",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "tighten",
+                "raise",
+                "optimal"
+              ]
+            }
+          },
+          {
+            "name": "filter[risk_level]",
+            "in": "query",
+            "description": "Filter by risk level derived from utilization vs hard limits",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "high",
+                "medium",
+                "low"
+              ]
+            }
+          },
+          {
+            "name": "group_by[cluster]",
+            "in": "query",
+            "description": "Aggregate recommendations by cluster (mutually exclusive with group_by[project])",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "group_by[project]",
+            "in": "query",
+            "description": "Aggregate recommendations by namespace (mutually exclusive with group_by[cluster])",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of results (1-100, default 20)",
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Number of results to skip",
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of quota recommendations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuotaRecommendationListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (e.g. group_by[cluster] and group_by[project] used together)"
+          },
+          "403": {
+            "description": "User is not authorized (RBAC)"
+          },
+          "404": {
+            "description": "Plugin disabled — enable the `quota` plugin via ROS_ENABLED_PLUGINS"
           },
           "503": {
             "description": "Service unavailable due to a database error"
@@ -5858,6 +5975,186 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/PVCRecommendation"
+            }
+          }
+        }
+      },
+      "QuotaResourceValues": {
+        "type": "object",
+        "description": "CPU and memory quota values (hard, used, or recommended).",
+        "properties": {
+          "cpu_request_millicores": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "cpu_limit_millicores": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "memory_request_bytes": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "memory_limit_bytes": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          }
+        }
+      },
+      "QuotaUtilizationPercents": {
+        "type": "object",
+        "description": "Utilization of quota hard limits as percentages (derived from basis points in storage).",
+        "properties": {
+          "cpu_request_percent": {
+            "type": "number",
+            "format": "float",
+            "nullable": true
+          },
+          "cpu_limit_percent": {
+            "type": "number",
+            "format": "float",
+            "nullable": true
+          },
+          "memory_request_percent": {
+            "type": "number",
+            "format": "float",
+            "nullable": true
+          },
+          "memory_limit_percent": {
+            "type": "number",
+            "format": "float",
+            "nullable": true
+          }
+        }
+      },
+      "QuotaCapacityFreed": {
+        "type": "object",
+        "description": "Capacity that could be reclaimed by tightening quota (CPU millicores and memory bytes).",
+        "properties": {
+          "cpu_millicores": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "memory_bytes": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "QuotaRecommendation": {
+        "type": "object",
+        "description": "Per-namespace quota recommendation row, or aggregated group row when group_by is used.",
+        "properties": {
+          "cluster_uuid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "namespace": {
+            "type": "string",
+            "description": "Kubernetes namespace (project)"
+          },
+          "recommendation_type": {
+            "type": "string",
+            "enum": [
+              "tighten",
+              "raise",
+              "optimal"
+            ]
+          },
+          "risk_level": {
+            "type": "string",
+            "enum": [
+              "high",
+              "medium",
+              "low"
+            ]
+          },
+          "quota_hard": {
+            "$ref": "#/components/schemas/QuotaResourceValues"
+          },
+          "quota_used": {
+            "$ref": "#/components/schemas/QuotaResourceValues"
+          },
+          "quota_recommended": {
+            "$ref": "#/components/schemas/QuotaResourceValues"
+          },
+          "utilization": {
+            "$ref": "#/components/schemas/QuotaUtilizationPercents"
+          },
+          "capacity_freed": {
+            "$ref": "#/components/schemas/QuotaCapacityFreed"
+          },
+          "estimated_savings": {
+            "$ref": "#/components/schemas/SavingsObject",
+            "nullable": true,
+            "description": "Estimated monthly savings from tightening quota (tighten recommendations)"
+          },
+          "last_observed_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp of the latest observation used for this recommendation (RFC3339 UTC)"
+          },
+          "count": {
+            "type": "integer",
+            "description": "Number of namespace rows in this group (present only when group_by[cluster] or group_by[project] is used)"
+          }
+        }
+      },
+      "QuotaRecommendationListResponse": {
+        "type": "object",
+        "description": "Paginated list of namespace ResourceQuota recommendations.",
+        "properties": {
+          "meta": {
+            "type": "object",
+            "properties": {
+              "count": {
+                "type": "integer",
+                "description": "Total matching rows (or distinct groups when group_by is used)"
+              },
+              "limit": {
+                "type": "integer"
+              },
+              "offset": {
+                "type": "integer"
+              },
+              "currency": {
+                "type": "string",
+                "description": "ISO 4217 currency code for estimated_savings (from Koku cost model). Defaults to USD.",
+                "example": "USD"
+              },
+              "warnings": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "links": {
+            "type": "object",
+            "properties": {
+              "first": {
+                "type": "string"
+              },
+              "previous": {
+                "type": "string"
+              },
+              "next": {
+                "type": "string"
+              },
+              "last": {
+                "type": "string"
+              }
+            }
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuotaRecommendation"
             }
           }
         }
