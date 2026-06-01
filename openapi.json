@@ -2017,6 +2017,16 @@
             }
           },
           {
+            "name": "filter[cluster]",
+            "in": "query",
+            "description": "Filter by cluster UUID (exact match). Alias: `cluster`, `cluster_uuid`, or `filter[cluster_uuid]`.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
             "name": "term",
             "in": "query",
             "description": "Filter by recommendation term window (e.g., `short_term`, `medium_term`, `long_term`). When omitted, the handler may use an optimized query path.",
@@ -7492,7 +7502,8 @@
         "type": "object",
         "properties": {
           "count": {
-            "type": "integer"
+            "type": "integer",
+            "description": "For `timeslicing`, the number of distinct node×GPU-model groups with recent GPU telemetry in `gpu_container_digests` (potential time-slicing candidates), not the count of actionable time-slicing recommendations. The `/gpu/timeslicing` list may return fewer rows because the engine rejects groups that are well-utilized, memory-bound, MIG-preferred, or below replica thresholds. For `mig`, the count of containers with a non-`full_gpu` MIG profile recommendation."
           },
           "link": {
             "type": "string",
