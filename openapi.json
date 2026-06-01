@@ -3769,7 +3769,31 @@
           {
             "name": "filter[cluster_quota_name]",
             "in": "query",
-            "description": "Filter by ClusterResourceQuota name (exact match)",
+            "description": "Filter by ClusterResourceQuota name (exact match). Aliases: `filter[cluster_resource_quota]`, `filter[crq]`.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[crq]",
+            "in": "query",
+            "description": "Alias for `filter[cluster_quota_name]`.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[namespace]",
+            "in": "query",
+            "description": "Filter to CRQs whose namespace membership includes this namespace (exact match). Alias: `namespace` or `filter[project]`.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[project]",
+            "in": "query",
+            "description": "Alias for `filter[namespace]`.",
             "schema": {
               "type": "string"
             }
@@ -8873,6 +8897,16 @@
           "memory_bytes": {
             "type": "integer",
             "format": "int64"
+          },
+          "storage_request_bytes": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Storage request quota capacity freed on tighten (bytes)"
+          },
+          "pods_freed": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Pod count capacity freed on tighten (no monetary savings)"
           }
         }
       },
