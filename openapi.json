@@ -6622,6 +6622,9 @@
           "network_qos": {
             "$ref": "#/components/schemas/VMNetworkQoSSettings"
           },
+          "storage_tiering": {
+            "$ref": "#/components/schemas/VMStorageTieringSettings"
+          },
           "instance_type_matching": {
             "type": "boolean"
           },
@@ -6640,7 +6643,7 @@
       },
       "VMSettingsUpdate": {
         "type": "object",
-        "description": "Partial VM settings update. Any subset of thresholds, memory_floors, disk, io, network, gpu, placement, power_schedule, network_qos, instance_type_matching, cpu_adaptive_margin_enabled, stability.",
+        "description": "Partial VM settings update. Any subset of thresholds, memory_floors, disk, io, network, gpu, placement, power_schedule, network_qos, storage_tiering, instance_type_matching, cpu_adaptive_margin_enabled, stability.",
         "properties": {
           "cpu_adaptive_margin_enabled": {
             "type": "boolean"
@@ -6674,6 +6677,9 @@
           },
           "network_qos": {
             "$ref": "#/components/schemas/VMNetworkQoSSettings"
+          },
+          "storage_tiering": {
+            "$ref": "#/components/schemas/VMStorageTieringSettings"
           },
           "instance_type_matching": {
             "type": "boolean"
@@ -9422,6 +9428,48 @@
             "format": "int64",
             "minimum": 1,
             "description": "Packets per second at or above which to suggest DPDK for small-packet workloads (default 500000)"
+          }
+        }
+      },
+      "VMStorageTieringSettings": {
+        "type": "object",
+        "description": "Simplified storage tier hints from multi-day I/O patterns (notifications 67–69). Full StorageClass-aware tiering is future work.",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "When true, emit cold/IOPS/throughput storage tier hint notifications"
+          },
+          "min_days": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Minimum digest history required before evaluation (default 7)"
+          },
+          "cold_min_days": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Days classified as low-io to suggest lower-cost storage (default 14)"
+          },
+          "iops_min_days": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Days with random high IOPS to suggest IOPS-optimized storage (default 7)"
+          },
+          "throughput_min_days": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Days with sequential high throughput to suggest throughput-optimized storage (default 7)"
+          },
+          "high_iops_threshold": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1,
+            "description": "Peak daily read+write IOPS above which random I/O counts as high (default 5000)"
+          },
+          "high_throughput_bps": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1,
+            "description": "Peak daily read+write throughput (bps) above which sequential I/O counts as high (default 104857600)"
           }
         }
       },
