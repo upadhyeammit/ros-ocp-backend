@@ -6613,6 +6613,9 @@
           "gpu": {
             "$ref": "#/components/schemas/VMGPUSettings"
           },
+          "placement": {
+            "$ref": "#/components/schemas/VMPlacementSettings"
+          },
           "instance_type_matching": {
             "type": "boolean"
           },
@@ -6631,7 +6634,7 @@
       },
       "VMSettingsUpdate": {
         "type": "object",
-        "description": "Partial VM settings update. Any subset of thresholds, memory_floors, disk, io, instance_type_matching, cpu_adaptive_margin_enabled, stability.",
+        "description": "Partial VM settings update. Any subset of thresholds, memory_floors, disk, io, network, gpu, placement, instance_type_matching, cpu_adaptive_margin_enabled, stability.",
         "properties": {
           "cpu_adaptive_margin_enabled": {
             "type": "boolean"
@@ -6656,6 +6659,9 @@
           },
           "gpu": {
             "$ref": "#/components/schemas/VMGPUSettings"
+          },
+          "placement": {
+            "$ref": "#/components/schemas/VMPlacementSettings"
           },
           "instance_type_matching": {
             "type": "boolean"
@@ -8714,6 +8720,18 @@
             "type": "boolean",
             "description": "True when sustained network metrics qualify for n1 network-optimized instance type"
           },
+          "is_redundant_placement": {
+            "type": "boolean",
+            "description": "True when peer VMs with the same namespace resource profile run on the same node"
+          },
+          "has_shared_storage": {
+            "type": "boolean",
+            "description": "True when correlated workload peers share a namespace resource profile (PVC-level correlation requires operator PVC columns)"
+          },
+          "numa_oversized": {
+            "type": "boolean",
+            "description": "True when recommended memory exceeds ROS_VM_NUMA_NODE_MEMORY_GIB (per-NUMA cap until host topology is ingested)"
+          },
           "preference_name": {
             "type": "string",
             "nullable": true
@@ -9318,6 +9336,30 @@
           "enable_network_series": {
             "type": "boolean",
             "description": "When true, network-bound VMs may receive n1 instance types"
+          }
+        }
+      },
+      "VMPlacementSettings": {
+        "type": "object",
+        "description": "Cluster placement, correlated workload, and NUMA sizing checks (notifications 60–63)",
+        "properties": {
+          "enable_placement_checks": {
+            "type": "boolean",
+            "description": "When true, detect same-node redundancy and uneven node distribution"
+          },
+          "placement_skew_ratio": {
+            "type": "integer",
+            "minimum": 2,
+            "description": "Max:min VM count per node in a profile group before notification 61 (default 3)"
+          },
+          "enable_shared_pvc_correlation": {
+            "type": "boolean",
+            "description": "When true, flag correlated namespace peers (true PVC mapping requires operator PVC column)"
+          },
+          "numa_node_memory_gib": {
+            "type": "number",
+            "minimum": 1,
+            "description": "Assumed per-NUMA-node memory cap until host topology is ingested (default 64)"
           }
         }
       },
