@@ -8994,6 +8994,15 @@
           "gpu": {
             "$ref": "#/components/schemas/VMGPURecommendation"
           },
+          "savings": {
+            "nullable": true,
+            "description": "Estimated monthly savings from rightsizing. Null when ROS_SAVINGS_ESTIMATES_ENABLED is false, Koku masu is not configured, or no cost-model rates exist for the cluster.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SavingsObject"
+              }
+            ]
+          },
           "last_recommended_at": {
             "type": "string",
             "format": "date-time"
