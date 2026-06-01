@@ -8750,6 +8750,10 @@
           "hint": {
             "type": "string",
             "nullable": true
+          },
+          "pattern": {
+            "type": "string",
+            "description": "Disk I/O pattern: sequential, random, mixed, low-io, or empty when unclassified"
           }
         }
       },
@@ -9270,6 +9274,21 @@
           "high_iops_threshold": {
             "type": "integer",
             "format": "int64"
+          },
+          "sequential_threshold_bytes": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Average I/O size (BPS/IOPS) at or above this value classifies as sequential (default 65536)"
+          },
+          "random_threshold_bytes": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Average I/O size below this value classifies as random (default 16384)"
+          },
+          "min_iops_for_classification": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Peak combined IOPS below this returns low-io (default 100)"
           }
         }
       },
@@ -9304,8 +9323,28 @@
       },
       "VMGPUSettings": {
         "type": "object",
-        "description": "vGPU time-slicing tunables for VM recommendations",
+        "description": "GPU classification thresholds and vGPU time-slicing tunables for VM recommendations",
         "properties": {
+          "idle_threshold_bp": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Average SM utilization below this (basis points) classifies the GPU as idle (500 = 5%)"
+          },
+          "underutil_threshold_bp": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Average SM utilization below this (basis points) classifies the GPU as underutilized (3000 = 30%)"
+          },
+          "fb_saturation_mib": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Frame-buffer usage MiB above which the GPU is saturated; 0 uses 90% of catalog GPU memory"
+          },
+          "compute_saturation_threshold_bp": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Average SM utilization at or above this (basis points) classifies compute saturation (8500 = 85%)"
+          },
           "gpu_timeslice_min_replicas": {
             "type": "integer",
             "format": "int32",
