@@ -3383,6 +3383,70 @@
         }
       }
     },
+    "/recommendations/openshift/pvcs/detail": {
+      "get": {
+        "tags": [
+          "PVC Recommendations"
+        ],
+        "summary": "Get PVC recommendation detail with all terms and usage history",
+        "description": "Returns short, medium, and long term recommendations for a single PVC plus daily usage digests when available.",
+        "operationId": "getPVCRecommendationDetail",
+        "parameters": [
+          {
+            "name": "cluster_uuid",
+            "in": "query",
+            "required": true,
+            "description": "Cluster UUID. Alias: `filter[cluster]`.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "namespace",
+            "in": "query",
+            "required": true,
+            "description": "Namespace (project). Alias: `filter[project]`.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "persistentvolumeclaim",
+            "in": "query",
+            "required": true,
+            "description": "PersistentVolumeClaim name. Alias: `pvc_name`.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "PVC recommendation detail",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PVCRecommendationDetailResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing required query parameters"
+          },
+          "403": {
+            "description": "User is not authorized (RBAC)"
+          },
+          "404": {
+            "description": "PVC recommendation not found"
+          },
+          "503": {
+            "description": "Service unavailable due to a database error"
+          }
+        }
+      }
+    },
     "/recommendations/openshift/quota": {
       "get": {
         "tags": [
@@ -8121,6 +8185,71 @@
             "items": {
               "$ref": "#/components/schemas/PVCRecommendation"
             }
+          }
+        }
+      },
+      "PVCRecommendationDetailResponse": {
+        "type": "object",
+        "description": "PVC recommendation detail with all configured terms and optional daily usage history.",
+        "properties": {
+          "cluster_uuid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "namespace": {
+            "type": "string"
+          },
+          "persistentvolumeclaim": {
+            "type": "string"
+          },
+          "persistentvolume": {
+            "type": "string"
+          },
+          "storageclass": {
+            "type": "string"
+          },
+          "capacity_bytes": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "terms": {
+            "type": "object",
+            "description": "Recommendation keyed by term name (`short`, `medium`, `long`)",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/PVCRecommendation"
+            }
+          },
+          "historical_usage": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PVCHistoricalUsagePoint"
+            }
+          }
+        }
+      },
+      "PVCHistoricalUsagePoint": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date",
+            "description": "Digest bucket date (UTC)"
+          },
+          "capacity_bytes": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "usage_bytes_min": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "usage_bytes_max": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "usage_bytes_avg": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       },
