@@ -5913,6 +5913,12 @@
             "type": "boolean",
             "description": "When true, the cost engine uses CV-based CPU margin between cpu_margin_min and cpu_margin_max"
           },
+          "history_retention_days": {
+            "type": "integer",
+            "description": "Read-only. Days of vm_recommendation_history retained (admin env ROS_VM_REC_HISTORY_RETENTION_DAYS; default 90).",
+            "minimum": 1,
+            "example": 90
+          },
           "thresholds": {
             "$ref": "#/components/schemas/VMThresholdSettings"
           },
