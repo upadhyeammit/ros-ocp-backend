@@ -2239,10 +2239,236 @@
           "VM Recommendations"
         ],
         "summary": "List OpenShift Virtualization VM sizing recommendations",
+        "description": "Paginated list of VM rightsizing recommendations for clusters visible to the caller. Filters use Koku-style `filter[field]` query params; flat aliases (`vm_name`, `namespace`, `cluster`) are also accepted.",
+        "operationId": "getVMRecommendations",
         "x-plugin-required": "vm",
+        "parameters": [
+          {
+            "name": "filter[cluster]",
+            "in": "query",
+            "description": "Filter by cluster UUID (exact match). Alias: `cluster`, `cluster_uuid`, or `filter[cluster_uuid]`.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "filter[namespace]",
+            "in": "query",
+            "description": "Filter by namespace (exact match). Alias: `namespace` or `filter[project]`.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[vm_name]",
+            "in": "query",
+            "description": "Filter by VirtualMachine name (exact match). Alias: `vm_name`.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[term]",
+            "in": "query",
+            "description": "Filter by recommendation term (`short_term`, `medium_term`, `long_term`).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[engine]",
+            "in": "query",
+            "description": "Filter by sizing engine (`cost` or `performance`).",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "cost",
+                "performance"
+              ]
+            }
+          },
+          {
+            "name": "filter[confidence]",
+            "in": "query",
+            "description": "Filter by recommendation confidence.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "high",
+                "moderate",
+                "low"
+              ]
+            }
+          },
+          {
+            "name": "filter[is_idle]",
+            "in": "query",
+            "description": "Filter by idle classification (`true` or `false`).",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            }
+          },
+          {
+            "name": "filter[is_abandoned]",
+            "in": "query",
+            "description": "Filter by abandoned classification (`true` or `false`).",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            }
+          },
+          {
+            "name": "filter[is_oversized]",
+            "in": "query",
+            "description": "Filter by oversized classification (`true` or `false`).",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            }
+          },
+          {
+            "name": "filter[guest_agent_detected]",
+            "in": "query",
+            "description": "Filter by guest agent presence (`true` or `false`).",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            }
+          },
+          {
+            "name": "filter[has_gpu]",
+            "in": "query",
+            "description": "Filter VMs with (`true`) or without (`false`) attached GPUs.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            }
+          },
+          {
+            "name": "filter[gpu_classification]",
+            "in": "query",
+            "description": "Filter by GPU utilization classification.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "idle",
+                "underutilized",
+                "well_utilized",
+                "saturated"
+              ]
+            }
+          },
+          {
+            "name": "order_by",
+            "in": "query",
+            "description": "Sort field. Bracket form `order_by[field]` is also accepted.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "vm_name",
+                "namespace",
+                "current_vcpu",
+                "current_memory_gib",
+                "guest_os",
+                "recommended_vcpu",
+                "recommended_memory_gib",
+                "is_idle",
+                "is_abandoned",
+                "is_oversized",
+                "confidence",
+                "last_recommended_at"
+              ],
+              "default": "vm_name"
+            }
+          },
+          {
+            "name": "order_how",
+            "in": "query",
+            "description": "Sort direction.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "default": "asc"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Page size (1-100, default 10).",
+            "schema": {
+              "type": "integer",
+              "default": 10,
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Zero-based offset into results.",
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "minimum": 0
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": "VM recommendation list"
+            "description": "VM recommendation list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VMRecommendationListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query parameters or request body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ROSAPIError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User is not authorized (RBAC)"
+          },
+          "404": {
+            "description": "Plugin disabled \u2014 enable VM via ROS_ENABLE_VM_RECS and ROS_ENABLED_PLUGINS"
+          },
+          "503": {
+            "description": "Service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ROSAPIError"
+                }
+              }
+            }
           }
         }
       }
@@ -2253,10 +2479,107 @@
           "VM Recommendations"
         ],
         "summary": "Get VM recommendation detail with daily digests",
+        "description": "Returns a single VM recommendation including daily digest history and per-GPU device metrics when GPUs are attached.",
+        "operationId": "getVMRecommendationDetail",
         "x-plugin-required": "vm",
+        "parameters": [
+          {
+            "name": "cluster_uuid",
+            "in": "query",
+            "required": true,
+            "description": "Cluster UUID. Alias: `filter[cluster]`.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "vm_name",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "namespace",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "term",
+            "in": "query",
+            "description": "Recommendation term (default `medium_term`).",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "short_term",
+                "medium_term",
+                "long_term"
+              ],
+              "default": "medium_term"
+            }
+          },
+          {
+            "name": "engine",
+            "in": "query",
+            "description": "Sizing engine (default `cost`).",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "cost",
+                "performance"
+              ],
+              "default": "cost"
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": "VM recommendation detail"
+            "description": "VM recommendation detail",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VMRecommendationItem"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query parameters or request body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ROSAPIError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User is not authorized (RBAC)"
+          },
+          "404": {
+            "description": "VM recommendation not found, or plugin disabled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ROSAPIError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ROSAPIError"
+                }
+              }
+            }
           }
         }
       }
@@ -2267,10 +2590,119 @@
           "VM Recommendations"
         ],
         "summary": "Get historical VM recommendations for a workload",
+        "description": "Returns prior recommendation snapshots stored in `vm_recommendation_history` for the given VM.",
+        "operationId": "getVMRecommendationHistory",
         "x-plugin-required": "vm",
+        "parameters": [
+          {
+            "name": "vm_name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cluster_uuid",
+            "in": "query",
+            "required": true,
+            "description": "Cluster UUID. Alias: `cluster_id`.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "namespace",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "term",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "short_term",
+                "medium_term",
+                "long_term"
+              ],
+              "default": "short_term"
+            }
+          },
+          {
+            "name": "engine",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "cost",
+                "performance"
+              ],
+              "default": "cost"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Page size (1-100, default 10).",
+            "schema": {
+              "type": "integer",
+              "default": 10,
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Zero-based offset into results.",
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "minimum": 0
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": "VM recommendation history"
+            "description": "VM recommendation history",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VMRecommendationHistoryResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query parameters or request body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ROSAPIError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User is not authorized (RBAC)"
+          },
+          "404": {
+            "description": "Plugin disabled \u2014 enable VM via ROS_ENABLE_VM_RECS and ROS_ENABLED_PLUGINS"
+          },
+          "503": {
+            "description": "Service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ROSAPIError"
+                }
+              }
+            }
           }
         }
       }
@@ -2281,10 +2713,66 @@
           "VM Recommendations"
         ],
         "summary": "List cluster VirtualMachineClusterInstancetype definitions",
+        "description": "Returns instancetype catalog and VirtualMachine preference summary for a cluster.",
+        "operationId": "getClusterInstanceTypes",
         "x-plugin-required": "vm",
+        "parameters": [
+          {
+            "name": "cluster_uuid",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": "Cluster instance types"
+            "description": "Cluster instance types",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClusterInstanceTypesResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query parameters or request body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ROSAPIError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User is not authorized (RBAC)"
+          },
+          "404": {
+            "description": "Plugin disabled \u2014 enable VM via ROS_ENABLE_VM_RECS and ROS_ENABLED_PLUGINS"
+          },
+          "500": {
+            "description": "Internal error loading instance types",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ROSAPIError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ROSAPIError"
+                }
+              }
+            }
           }
         }
       }
@@ -2914,7 +3402,7 @@
             "description": "User is not authorized (RBAC)"
           },
           "404": {
-            "description": "Plugin disabled — enable the `quota` plugin via ROS_ENABLED_PLUGINS"
+            "description": "Plugin disabled \u2014 enable the `quota` plugin via ROS_ENABLED_PLUGINS"
           },
           "503": {
             "description": "Service unavailable due to a database error"
@@ -2945,7 +3433,7 @@
             "description": "User is not authorized (RBAC)"
           },
           "404": {
-            "description": "Plugin disabled — enable the `quota` plugin via ROS_ENABLED_PLUGINS"
+            "description": "Plugin disabled \u2014 enable the `quota` plugin via ROS_ENABLED_PLUGINS"
           },
           "503": {
             "description": "Service unavailable"
@@ -3117,7 +3605,7 @@
             "description": "User is not authorized (RBAC)"
           },
           "404": {
-            "description": "Plugin disabled — enable the `cluster-quota` plugin via ROS_ENABLED_PLUGINS"
+            "description": "Plugin disabled \u2014 enable the `cluster-quota` plugin via ROS_ENABLED_PLUGINS"
           },
           "503": {
             "description": "Service unavailable due to a database error"
@@ -3148,7 +3636,7 @@
             "description": "User is not authorized (RBAC)"
           },
           "404": {
-            "description": "Plugin disabled — enable the `cluster-quota` plugin via ROS_ENABLED_PLUGINS"
+            "description": "Plugin disabled \u2014 enable the `cluster-quota` plugin via ROS_ENABLED_PLUGINS"
           },
           "503": {
             "description": "Service unavailable"
@@ -3682,7 +4170,14 @@
             "description": "Invalid request body or recommendation_type"
           },
           "403": {
-            "description": "Field locked by environment variable or RBAC denied"
+            "description": "Field locked by environment variable, tenant settings globally locked (ROS_SETTINGS_LOCKED), or RBAC denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsLockedForbiddenResponse"
+                }
+              }
+            }
           },
           "503": {
             "description": "Service unavailable due to a database error"
@@ -3721,7 +4216,14 @@
             "description": "Missing or invalid recommendation_type"
           },
           "403": {
-            "description": "User is not authorized (RBAC)"
+            "description": "Tenant settings globally locked (ROS_SETTINGS_LOCKED), field locked by environment variable, or RBAC denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsLockedForbiddenResponse"
+                }
+              }
+            }
           },
           "503": {
             "description": "Service unavailable due to a database error"
@@ -3753,7 +4255,7 @@
             "description": "User is not authorized (RBAC)"
           },
           "404": {
-            "description": "Plugin disabled — enable VM via ROS_ENABLE_VM_RECS and ROS_ENABLED_PLUGINS"
+            "description": "Plugin disabled \u2014 enable VM via ROS_ENABLE_VM_RECS and ROS_ENABLED_PLUGINS"
           },
           "503": {
             "description": "Service unavailable"
@@ -4312,7 +4814,14 @@
             "description": "Validation error"
           },
           "403": {
-            "description": "Forbidden (locked fields or RBAC)"
+            "description": "Forbidden (locked fields, ROS_SETTINGS_LOCKED, or RBAC)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsLockedForbiddenResponse"
+                }
+              }
+            }
           },
           "503": {
             "description": "Service unavailable"
@@ -4337,7 +4846,14 @@
             }
           },
           "403": {
-            "description": "User is not authorized (RBAC)"
+            "description": "Tenant settings globally locked (ROS_SETTINGS_LOCKED) or RBAC denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsLockedForbiddenResponse"
+                }
+              }
+            }
           },
           "503": {
             "description": "Service unavailable"
@@ -5394,24 +5910,19 @@
             "type": "boolean"
           },
           "thresholds": {
-            "type": "object",
-            "additionalProperties": true
+            "$ref": "#/components/schemas/VMThresholdSettings"
           },
           "memory_floors": {
-            "type": "object",
-            "additionalProperties": true
+            "$ref": "#/components/schemas/VMMemoryFloorsSettings"
           },
           "stability": {
-            "type": "object",
-            "additionalProperties": true
+            "$ref": "#/components/schemas/VMStabilitySettings"
           },
           "disk": {
-            "type": "object",
-            "additionalProperties": true
+            "$ref": "#/components/schemas/VMDiskSettings"
           },
           "io": {
-            "type": "object",
-            "additionalProperties": true
+            "$ref": "#/components/schemas/VMIOSettings"
           },
           "instance_type_matching": {
             "type": "boolean"
@@ -5431,8 +5942,27 @@
       },
       "VMSettingsUpdate": {
         "type": "object",
-        "additionalProperties": true,
-        "description": "Partial VM settings update (thresholds, memory_floors, disk, io, instance_type_matching, stability)"
+        "description": "Partial VM settings update. Any subset of thresholds, memory_floors, disk, io, instance_type_matching, stability.",
+        "properties": {
+          "thresholds": {
+            "$ref": "#/components/schemas/VMThresholdSettings"
+          },
+          "memory_floors": {
+            "$ref": "#/components/schemas/VMMemoryFloorsSettings"
+          },
+          "stability": {
+            "$ref": "#/components/schemas/VMStabilitySettings"
+          },
+          "disk": {
+            "$ref": "#/components/schemas/VMDiskSettings"
+          },
+          "io": {
+            "$ref": "#/components/schemas/VMIOSettings"
+          },
+          "instance_type_matching": {
+            "type": "boolean"
+          }
+        }
       },
       "VMTermSettingsResponse": {
         "type": "object",
@@ -7056,7 +7586,7 @@
             "type": "integer",
             "minimum": 0,
             "maximum": 100,
-            "description": "Extra margin on recommended hard limits (10 → multiply container rec sums by 1.10)"
+            "description": "Extra margin on recommended hard limits (10 \u2192 multiply container rec sums by 1.10)"
           },
           "high_risk_threshold_percent": {
             "type": "integer",
@@ -7374,6 +7904,652 @@
                 "minimum": 0
               }
             }
+          }
+        }
+      },
+      "ROSAPIError": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "error"
+          },
+          "message": {
+            "type": "string"
+          },
+          "validation_errors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Present on validation failures (e.g. settings PUT)"
+          }
+        }
+      },
+      "VMListMeta": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "integer",
+            "description": "Total matching VM recommendations"
+          },
+          "limit": {
+            "type": "integer"
+          },
+          "offset": {
+            "type": "integer"
+          }
+        }
+      },
+      "VMSizingBlock": {
+        "type": "object",
+        "properties": {
+          "vcpu": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "memory_gib": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "disk_gib": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "instance_type": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "VMRecommendedSizing": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/VMSizingBlock"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "series": {
+                "type": "string",
+                "nullable": true
+              }
+            }
+          }
+        ]
+      },
+      "VMRecMetadata": {
+        "type": "object",
+        "properties": {
+          "guest_agent_detected": {
+            "type": "boolean"
+          },
+          "confidence": {
+            "type": "string",
+            "enum": [
+              "high",
+              "moderate",
+              "low"
+            ]
+          },
+          "term": {
+            "type": "string"
+          },
+          "engine": {
+            "type": "string",
+            "enum": [
+              "cost",
+              "performance"
+            ]
+          },
+          "is_idle": {
+            "type": "boolean"
+          },
+          "is_abandoned": {
+            "type": "boolean"
+          },
+          "is_oversized": {
+            "type": "boolean"
+          },
+          "preference_name": {
+            "type": "string",
+            "nullable": true
+          },
+          "preference_class": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "VMIOProfile": {
+        "type": "object",
+        "properties": {
+          "read_iops_p95": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "write_iops_p95": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "read_bps_p95": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "write_bps_p95": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "hint": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "VMDiskProjection": {
+        "type": "object",
+        "properties": {
+          "days_until_full": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "growth_gib_per_day": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "recommended_expand_gib": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        }
+      },
+      "VMGPUDeviceDigest": {
+        "type": "object",
+        "properties": {
+          "uuid": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          },
+          "util_avg_bp": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "util_max_bp": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "fb_used_avg_mib": {
+            "type": "number",
+            "format": "double"
+          },
+          "fb_used_max_mib": {
+            "type": "number",
+            "format": "double"
+          },
+          "sm_active_avg_bp": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tensor_avg_bp": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "dram_avg_bp": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "mig_profile": {
+            "type": "string"
+          },
+          "max_slices": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "VMGPURecommendation": {
+        "type": "object",
+        "properties": {
+          "gpu_count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "gpu_model": {
+            "type": "string"
+          },
+          "gpu_classification": {
+            "type": "string",
+            "enum": [
+              "idle",
+              "underutilized",
+              "well_utilized",
+              "saturated"
+            ]
+          },
+          "recommended_gpu_action": {
+            "type": "string"
+          },
+          "recommended_gpu_profile": {
+            "type": "string"
+          },
+          "recommended_time_slice_count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "gpu_utilization_avg_bp": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "gpu_devices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VMGPUDeviceDigest"
+            },
+            "description": "Populated on detail responses with per-device digest metrics"
+          }
+        }
+      },
+      "VMDailyDigestItem": {
+        "type": "object",
+        "properties": {
+          "bucket_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "cpu_usage_p95_mc": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "mem_usage_p95_kib": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "sample_count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "cpu_usage_p50_mc": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "cpu_usage_p99_mc": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "cpu_usage_max_mc": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "mem_usage_p50_kib": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "mem_usage_p99_kib": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "mem_usage_max_kib": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "gpu_devices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VMGPUDeviceDigest"
+            }
+          }
+        }
+      },
+      "VMRecommendationItem": {
+        "type": "object",
+        "properties": {
+          "vm_name": {
+            "type": "string"
+          },
+          "namespace": {
+            "type": "string"
+          },
+          "cluster_uuid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "guest_os": {
+            "type": "string"
+          },
+          "current": {
+            "$ref": "#/components/schemas/VMSizingBlock"
+          },
+          "recommended": {
+            "$ref": "#/components/schemas/VMRecommendedSizing"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/VMRecMetadata"
+          },
+          "io_profile": {
+            "$ref": "#/components/schemas/VMIOProfile"
+          },
+          "disk_projection": {
+            "$ref": "#/components/schemas/VMDiskProjection"
+          },
+          "notifications": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "description": "Structured notification objects (idle, GPU, disk, etc.)"
+          },
+          "gpu": {
+            "$ref": "#/components/schemas/VMGPURecommendation"
+          },
+          "last_recommended_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "daily_digests": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VMDailyDigestItem"
+            },
+            "description": "Present on GET /vm/detail only"
+          }
+        }
+      },
+      "VMRecommendationListResponse": {
+        "type": "object",
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/VMListMeta"
+          },
+          "links": {
+            "type": "object",
+            "properties": {
+              "first": {
+                "type": "string"
+              },
+              "previous": {
+                "type": "string",
+                "nullable": true
+              },
+              "next": {
+                "type": "string",
+                "nullable": true
+              },
+              "last": {
+                "type": "string"
+              }
+            }
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VMRecommendationItem"
+            }
+          }
+        }
+      },
+      "VMRecommendationHistoryRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "org_id": {
+            "type": "string"
+          },
+          "cluster_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "vm_name": {
+            "type": "string"
+          },
+          "namespace": {
+            "type": "string"
+          },
+          "term": {
+            "type": "string"
+          },
+          "engine": {
+            "type": "string",
+            "enum": [
+              "cost",
+              "performance"
+            ]
+          },
+          "recommended_vcpu": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "recommended_memory_gib": {
+            "type": "number",
+            "format": "double"
+          },
+          "recommended_instance_type": {
+            "type": "string"
+          },
+          "gpu_classification": {
+            "type": "string"
+          },
+          "recommended_gpu_action": {
+            "type": "string"
+          },
+          "is_idle": {
+            "type": "boolean"
+          },
+          "is_abandoned": {
+            "type": "boolean"
+          },
+          "confidence": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "VMRecommendationHistoryResponse": {
+        "type": "object",
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/VMListMeta"
+          },
+          "links": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VMRecommendationHistoryRow"
+            }
+          }
+        }
+      },
+      "ClusterInstanceTypeItem": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "series": {
+            "type": "string"
+          },
+          "vcpu": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "memory_gib": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "gpus": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ClusterInstanceTypesResponse": {
+        "type": "object",
+        "properties": {
+          "cluster_uuid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "collected_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "instance_types": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClusterInstanceTypeItem"
+            }
+          },
+          "preferences": {
+            "type": "object",
+            "properties": {
+              "configured": {
+                "type": "boolean"
+              },
+              "preference_count": {
+                "type": "integer"
+              },
+              "vm_preference_count": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      },
+      "VMThresholdSettings": {
+        "type": "object",
+        "properties": {
+          "cpu_percentile_cost": {
+            "type": "number",
+            "format": "double"
+          },
+          "cpu_percentile_perf": {
+            "type": "number",
+            "format": "double"
+          },
+          "cpu_margin_min": {
+            "type": "number",
+            "format": "double"
+          },
+          "cpu_margin_max": {
+            "type": "number",
+            "format": "double"
+          },
+          "mem_margin_min": {
+            "type": "number",
+            "format": "double"
+          },
+          "downsize_hysteresis_ratio": {
+            "type": "number",
+            "format": "double"
+          },
+          "min_vcpu_change": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "min_gib_change": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "idle_cpu_mc": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "idle_memory_mib": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "idle_cpu_mc_windows": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "idle_memory_mib_windows": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "abandoned_min_days": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "VMMemoryFloorsSettings": {
+        "type": "object",
+        "properties": {
+          "linux_gib": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "windows_gib": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "windows_kernel_reserve_gib": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "VMStabilitySettings": {
+        "type": "object",
+        "properties": {
+          "downsize_stability_days": {
+            "type": "integer"
+          },
+          "crash_loop_restart_threshold": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "VMDiskSettings": {
+        "type": "object",
+        "properties": {
+          "projection_window_days": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "headroom_pct": {
+            "type": "number",
+            "format": "double"
+          },
+          "round_step_gib": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "min_growth_mib_per_day": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "VMIOSettings": {
+        "type": "object",
+        "properties": {
+          "high_iops_threshold": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       }
