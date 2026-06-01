@@ -6587,6 +6587,12 @@
           "io": {
             "$ref": "#/components/schemas/VMIOSettings"
           },
+          "network": {
+            "$ref": "#/components/schemas/VMNetworkSettings"
+          },
+          "gpu": {
+            "$ref": "#/components/schemas/VMGPUSettings"
+          },
           "instance_type_matching": {
             "type": "boolean"
           },
@@ -6624,6 +6630,12 @@
           },
           "io": {
             "$ref": "#/components/schemas/VMIOSettings"
+          },
+          "network": {
+            "$ref": "#/components/schemas/VMNetworkSettings"
+          },
+          "gpu": {
+            "$ref": "#/components/schemas/VMGPUSettings"
           },
           "instance_type_matching": {
             "type": "boolean"
@@ -8678,6 +8690,10 @@
           "is_oversized": {
             "type": "boolean"
           },
+          "is_network_bound": {
+            "type": "boolean",
+            "description": "True when sustained network metrics qualify for n1 network-optimized instance type"
+          },
           "preference_name": {
             "type": "string",
             "nullable": true
@@ -8811,6 +8827,24 @@
           "recommended_time_slice_count": {
             "type": "integer",
             "format": "int32"
+          },
+          "gpu_timeslice_confidence": {
+            "type": "string",
+            "enum": [
+              "high",
+              "moderate",
+              "low",
+              ""
+            ],
+            "description": "Confidence in vGPU time-slicing recommendation (empty when not applicable)"
+          },
+          "gpu_timeslice_rationale": {
+            "type": "string",
+            "description": "Human-readable explanation for time-slicing confidence"
+          },
+          "recommended_vgpu_profile": {
+            "type": "string",
+            "description": "Recommended vGPU profile when time-slicing or profile selection applies"
           },
           "gpu_utilization_avg_bp": {
             "type": "integer",
@@ -9216,6 +9250,61 @@
           "high_iops_threshold": {
             "type": "integer",
             "format": "int64"
+          }
+        }
+      },
+      "VMNetworkSettings": {
+        "type": "object",
+        "description": "n1 network-optimized classification thresholds",
+        "properties": {
+          "throughput_threshold_bps": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Sustained aggregate rx+tx P95 above this (bytes/sec) contributes to network-bound classification"
+          },
+          "pps_threshold": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Packets-per-second P95 threshold for alternate network-bound path"
+          },
+          "drop_ratio_bp": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Max daily drop ratio must exceed this (basis points; 10 = 0.1%) with high PPS"
+          },
+          "sustained_days": {
+            "type": "integer",
+            "description": "Days in term window meeting throughput or PPS+drop criteria"
+          },
+          "enable_network_series": {
+            "type": "boolean",
+            "description": "When true, network-bound VMs may receive n1 instance types"
+          }
+        }
+      },
+      "VMGPUSettings": {
+        "type": "object",
+        "description": "vGPU time-slicing tunables for VM recommendations",
+        "properties": {
+          "gpu_timeslice_min_replicas": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Minimum recommended_time_slice_count when time-slicing is advised"
+          },
+          "gpu_timeslice_max_replicas": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Upper cap on slice count; reduced when DRAM exceeds penalty threshold"
+          },
+          "gpu_timeslice_fb_safety_threshold_bp": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Do not recommend time-slicing when frame-buffer fraction is at or above this (8000 = 80%)"
+          },
+          "gpu_timeslice_dram_penalty_threshold_bp": {
+            "type": "integer",
+            "format": "int32",
+            "description": "When DRAM is at or above this, max replicas is halved (5000 = 50%)"
           }
         }
       }
