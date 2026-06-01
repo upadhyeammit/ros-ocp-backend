@@ -8070,6 +8070,10 @@
           "persistentvolumeclaim": {
             "type": "string"
           },
+          "mounted_by": {
+            "type": "string",
+            "description": "Most recently observed pod mounting this PVC (display context only; from storage CSV pod column)"
+          },
           "persistentvolume": {
             "type": "string"
           },
@@ -8201,6 +8205,10 @@
           },
           "persistentvolumeclaim": {
             "type": "string"
+          },
+          "mounted_by": {
+            "type": "string",
+            "description": "Most recently observed pod mounting this PVC (from medium term when available)"
           },
           "persistentvolume": {
             "type": "string"
