@@ -9494,6 +9494,11 @@
             "type": "number",
             "minimum": 1,
             "description": "Assumed per-NUMA-node memory cap until host topology is ingested (default 64)"
+          },
+          "numa_assumed_sockets": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Divides node allocatable memory from daily_node_digests for per-NUMA estimate when host topology is not ingested (default 2)"
           }
         }
       },
