@@ -5909,6 +5909,10 @@
           "enabled": {
             "type": "boolean"
           },
+          "cpu_adaptive_margin_enabled": {
+            "type": "boolean",
+            "description": "When true, the cost engine uses CV-based CPU margin between cpu_margin_min and cpu_margin_max"
+          },
           "thresholds": {
             "$ref": "#/components/schemas/VMThresholdSettings"
           },
@@ -5942,8 +5946,11 @@
       },
       "VMSettingsUpdate": {
         "type": "object",
-        "description": "Partial VM settings update. Any subset of thresholds, memory_floors, disk, io, instance_type_matching, stability.",
+        "description": "Partial VM settings update. Any subset of thresholds, memory_floors, disk, io, instance_type_matching, cpu_adaptive_margin_enabled, stability.",
         "properties": {
+          "cpu_adaptive_margin_enabled": {
+            "type": "boolean"
+          },
           "thresholds": {
             "$ref": "#/components/schemas/VMThresholdSettings"
           },
