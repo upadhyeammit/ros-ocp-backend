@@ -2864,6 +2864,16 @@
             }
           },
           {
+            "name": "filter[idle_state]",
+            "in": "query",
+            "description": "Comma-separated node idle states to include: active, idle, zombie. Example: zombie,idle",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "zombie,idle"
+            }
+          },
+          {
             "name": "order_by",
             "in": "query",
             "schema": {
@@ -7632,6 +7642,15 @@
           },
           "is_overcommitted": {
             "type": "boolean"
+          },
+          "idle_state": {
+            "type": "string",
+            "enum": [
+              "active",
+              "idle",
+              "zombie"
+            ],
+            "description": "Node activity classification (migration 000111). Filter with filter[idle_state]."
           },
           "stranded_resource": {
             "type": "string",
