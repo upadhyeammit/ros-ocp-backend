@@ -1067,7 +1067,8 @@
                 "namespace",
                 "node",
                 "gpu",
-                "pvc"
+                "pvc",
+                "vm"
               ]
             }
           }
@@ -1108,7 +1109,8 @@
                 "namespace",
                 "node",
                 "gpu",
-                "pvc"
+                "pvc",
+                "vm"
               ]
             }
           }
@@ -1136,6 +1138,16 @@
           },
           "400": {
             "description": "Validation error (invalid name, window_days out of range, min_data_days > window_days, etc.)"
+          },
+          "403": {
+            "description": "Tenant settings globally locked (ROS_SETTINGS_LOCKED for recommendation_type or terms) or RBAC denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsLockedForbiddenResponse"
+                }
+              }
+            }
           },
           "422": {
             "description": "One or more terms are locked by administrator environment variables and cannot be modified",
@@ -1184,7 +1196,8 @@
                 "namespace",
                 "node",
                 "gpu",
-                "pvc"
+                "pvc",
+                "vm"
               ]
             }
           }
@@ -1202,6 +1215,16 @@
           },
           "400": {
             "description": "Missing or invalid recommendation_type"
+          },
+          "403": {
+            "description": "Tenant settings globally locked (ROS_SETTINGS_LOCKED for recommendation_type or terms) or RBAC denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsLockedForbiddenResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -3407,7 +3430,11 @@
                       "items": {
                         "type": "string"
                       },
-                      "description": "Fields locked by environment variables (read-only via API)"
+                      "description": "Fields locked by environment variables or ROS_SETTINGS_LOCKED (use [\"*\"] when all tenant overrides are frozen)"
+                    },
+                    "settings_locked": {
+                      "type": "boolean",
+                      "description": "True when ROS_SETTINGS_LOCKED prevents tenant Settings API writes"
                     }
                   }
                 }
@@ -3494,7 +3521,40 @@
             "description": "Invalid request body"
           },
           "403": {
-            "description": "Field is locked by environment variable"
+            "description": "Field is locked by environment variable, tenant settings globally locked (ROS_SETTINGS_LOCKED), or RBAC denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsLockedForbiddenResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable due to a database error"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Snapshot Settings"
+        ],
+        "summary": "Reset snapshot settings to defaults",
+        "description": "Removes per-organization snapshot settings overrides. Returns 403 when ROS_SETTINGS_LOCKED blocks tenant writes.",
+        "operationId": "deleteSnapshotSettings",
+        "responses": {
+          "204": {
+            "description": "Tenant overrides removed"
+          },
+          "403": {
+            "description": "Tenant settings globally locked (ROS_SETTINGS_LOCKED) or RBAC denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsLockedForbiddenResponse"
+                }
+              }
+            }
           },
           "503": {
             "description": "Service unavailable due to a database error"
@@ -3540,7 +3600,11 @@
                       "items": {
                         "type": "string"
                       },
-                      "description": "Fields locked by environment variables (read-only via API)"
+                      "description": "Fields locked by environment variables or ROS_SETTINGS_LOCKED ([\"*\"] when all tenant overrides are frozen)"
+                    },
+                    "settings_locked": {
+                      "type": "boolean",
+                      "description": "True when ROS_SETTINGS_LOCKED prevents tenant threshold overrides for this recommendation_type"
                     }
                   },
                   "additionalProperties": true
@@ -3661,6 +3725,229 @@
           },
           "503": {
             "description": "Service unavailable due to a database error"
+          }
+        }
+      }
+    },
+    "/recommendations/openshift/settings/vm": {
+      "get": {
+        "tags": [
+          "VM Settings"
+        ],
+        "summary": "Get VM recommendation settings",
+        "description": "Returns VM rightsizing thresholds, memory floors, disk, I/O, and instance-type matching settings. When ROS_SETTINGS_LOCKED is enabled, tenant DB overrides are ignored and locked_fields contains [\"*\"].",
+        "operationId": "getVMSettings",
+        "x-plugin-required": "vm",
+        "responses": {
+          "200": {
+            "description": "Current VM settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VMSettingsResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User is not authorized (RBAC)"
+          },
+          "404": {
+            "description": "Plugin disabled — enable VM via ROS_ENABLE_VM_RECS and ROS_ENABLED_PLUGINS"
+          },
+          "503": {
+            "description": "Service unavailable"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "VM Settings"
+        ],
+        "summary": "Update VM recommendation settings",
+        "operationId": "putVMSettings",
+        "x-plugin-required": "vm",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VMSettingsUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated VM settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VMSettingsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error"
+          },
+          "403": {
+            "description": "Field locked, tenant settings globally locked (ROS_SETTINGS_LOCKED), or RBAC denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsLockedForbiddenResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Plugin disabled"
+          },
+          "503": {
+            "description": "Service unavailable"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "VM Settings"
+        ],
+        "summary": "Reset VM recommendation settings",
+        "operationId": "deleteVMSettings",
+        "x-plugin-required": "vm",
+        "responses": {
+          "204": {
+            "description": "Tenant overrides removed"
+          },
+          "403": {
+            "description": "Tenant settings globally locked (ROS_SETTINGS_LOCKED) or RBAC denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsLockedForbiddenResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Plugin disabled"
+          },
+          "503": {
+            "description": "Service unavailable"
+          }
+        }
+      }
+    },
+    "/recommendations/openshift/settings/vm/terms": {
+      "get": {
+        "tags": [
+          "VM Settings"
+        ],
+        "summary": "Get VM recommendation term settings",
+        "operationId": "getVMTermSettings",
+        "x-plugin-required": "vm",
+        "responses": {
+          "200": {
+            "description": "VM term settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VMTermSettingsResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Plugin disabled"
+          },
+          "503": {
+            "description": "Service unavailable"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "VM Settings"
+        ],
+        "summary": "Update VM recommendation term settings",
+        "operationId": "putVMTermSettings",
+        "x-plugin-required": "vm",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VMTermSettingsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated VM term settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VMTermSettingsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error"
+          },
+          "403": {
+            "description": "Tenant settings globally locked (ROS_SETTINGS_LOCKED) or RBAC denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsLockedForbiddenResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Plugin disabled"
+          },
+          "503": {
+            "description": "Service unavailable"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "VM Settings"
+        ],
+        "summary": "Reset VM recommendation term settings",
+        "operationId": "deleteVMTermSettings",
+        "x-plugin-required": "vm",
+        "responses": {
+          "200": {
+            "description": "Default VM term settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VMTermSettingsResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Tenant settings globally locked (ROS_SETTINGS_LOCKED) or RBAC denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsLockedForbiddenResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Plugin disabled"
+          },
+          "503": {
+            "description": "Service unavailable"
           }
         }
       }
@@ -5081,6 +5368,145 @@
           }
         }
       },
+      "SettingsLockedForbiddenResponse": {
+        "type": "object",
+        "required": [
+          "error",
+          "locked"
+        ],
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Human-readable reason settings writes are blocked",
+            "example": "settings are locked by platform administrator"
+          },
+          "locked": {
+            "type": "boolean",
+            "description": "Always true for global settings lock denials",
+            "example": true
+          }
+        }
+      },
+      "VMSettingsResponse": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "thresholds": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "memory_floors": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "stability": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "disk": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "io": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "instance_type_matching": {
+            "type": "boolean"
+          },
+          "locked_fields": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Fields locked by env vars or ROS_SETTINGS_LOCKED ([\"*\"] when globally locked)"
+          },
+          "settings_locked": {
+            "type": "boolean",
+            "description": "True when ROS_SETTINGS_LOCKED prevents tenant VM settings writes"
+          }
+        }
+      },
+      "VMSettingsUpdate": {
+        "type": "object",
+        "additionalProperties": true,
+        "description": "Partial VM settings update (thresholds, memory_floors, disk, io, instance_type_matching, stability)"
+      },
+      "VMTermSettingsResponse": {
+        "type": "object",
+        "properties": {
+          "terms": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "window_days": {
+                  "type": "integer"
+                },
+                "min_data_days": {
+                  "type": "integer"
+                },
+                "decay_halflife_hours": {
+                  "type": "number"
+                },
+                "locked": {
+                  "type": "boolean"
+                },
+                "is_default": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "settings_locked": {
+            "type": "boolean",
+            "description": "True when ROS_SETTINGS_LOCKED blocks VM term overrides (same lock key as /settings/vm)"
+          }
+        }
+      },
+      "VMTermSettingsRequest": {
+        "type": "object",
+        "required": [
+          "terms"
+        ],
+        "properties": {
+          "terms": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 3,
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "enum": [
+                    "short_term",
+                    "medium_term",
+                    "long_term"
+                  ]
+                },
+                "window_days": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "min_data_days": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "decay_halflife_hours": {
+                  "type": "number",
+                  "minimum": 0
+                }
+              }
+            }
+          }
+        }
+      },
       "TermSettingsResponse": {
         "type": "object",
         "properties": {
@@ -5093,6 +5519,10 @@
             "items": {
               "$ref": "#/components/schemas/TermSettingsResponseItem"
             }
+          },
+          "settings_locked": {
+            "type": "boolean",
+            "description": "True when ROS_SETTINGS_LOCKED (or per-type lock) prevents tenant Settings API writes for this recommendation type"
           }
         }
       },
@@ -5287,6 +5717,17 @@
             "format": "date-time",
             "nullable": true,
             "description": "When the current reship_status was set"
+          },
+          "settings_locked": {
+            "type": "boolean",
+            "description": "True when ROS_SETTINGS_LOCKED prevents tenant business-hours overrides"
+          },
+          "locked_fields": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Fields frozen by ROS_SETTINGS_LOCKED ([\"*\"] when all tenant overrides are ignored)"
           }
         }
       },
@@ -6634,7 +7075,11 @@
             "items": {
               "type": "string"
             },
-            "description": "Fields locked by ROS_QUOTA_* environment variables"
+            "description": "Fields locked by ROS_QUOTA_* environment variables or ROS_SETTINGS_LOCKED ([\"*\"] when globally locked)"
+          },
+          "settings_locked": {
+            "type": "boolean",
+            "description": "True when ROS_SETTINGS_LOCKED prevents tenant quota settings writes"
           }
         }
       },
@@ -6821,7 +7266,11 @@
             "items": {
               "type": "string"
             },
-            "description": "Fields locked by ROS_CLUSTER_QUOTA_* environment variables"
+            "description": "Fields locked by ROS_CLUSTER_QUOTA_* environment variables or ROS_SETTINGS_LOCKED ([\"*\"] when globally locked)"
+          },
+          "settings_locked": {
+            "type": "boolean",
+            "description": "True when ROS_SETTINGS_LOCKED prevents tenant cluster-quota settings writes"
           }
         }
       },
