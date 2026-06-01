@@ -2338,6 +2338,26 @@
             }
           },
           {
+            "name": "filter[is_network_bound]",
+            "in": "query",
+            "description": "Filter by network-bound classification (`true` or `false`). Network-bound VMs may recommend n1 instance types.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            }
+          },
+          {
+            "name": "filter[guest_os]",
+            "in": "query",
+            "description": "Filter by guest OS substring (case-insensitive). Comma-separated values are ORed (e.g. `linux,windows`).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "filter[guest_agent_detected]",
             "in": "query",
             "description": "Filter by guest agent presence (`true` or `false`).",
