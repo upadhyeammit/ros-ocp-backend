@@ -3114,7 +3114,7 @@
           "Fleet Summary"
         ],
         "summary": "Get fleet-level savings summary",
-        "description": "Returns aggregated estimated monthly savings across all clusters for the authenticated organization. Sums persisted savings from container, node, PVC, and snapshot recommendations at medium term. Container and node totals honor the optional `engine` query parameter (default `cost`). GPU savings are computed at API read time and are excluded (see `gpu_savings_note`).",
+        "description": "Returns aggregated estimated monthly savings across all clusters for the authenticated organization. Sums persisted savings from container, node, PVC, snapshot, and VM recommendations at medium term. Container, node, and VM totals honor the optional `engine` query parameter (default `cost`). GPU savings are computed at API read time and are excluded (see `gpu_savings_note`).",
         "operationId": "getFleetSavingsSummary",
         "parameters": [
           {
@@ -3128,7 +3128,7 @@
               ],
               "default": "cost"
             },
-            "description": "Recommendation engine profile for container and node savings aggregation. Defaults to `cost` for backwards compatibility."
+            "description": "Recommendation engine profile for container, node, and VM savings aggregation. Defaults to `cost` for backwards compatibility."
           },
           {
             "name": "group_by[tag:environment]",
@@ -7847,6 +7847,11 @@
           "snapshot": {
             "type": "number",
             "format": "float"
+          },
+          "vm": {
+            "type": "number",
+            "format": "float",
+            "description": "Sum of persisted VM recommendation savings_amount at medium_term for the selected engine (requires ROS_SAVINGS_ESTIMATES_ENABLED and Koku effective_rates at ingestion)."
           }
         }
       },
