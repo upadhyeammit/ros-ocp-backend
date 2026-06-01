@@ -3453,7 +3453,7 @@
           "Quota Recommendations"
         ],
         "summary": "List namespace ResourceQuota recommendations",
-        "description": "Returns per-namespace Kubernetes ResourceQuota right-sizing recommendations for the authenticated organization. Compares configured quota hard limits and observed usage against aggregated container recommendation totals, then classifies each namespace as tighten (reduce over-provisioned quota), raise (usage approaching limits), or optimal. Default sort order is namespace ascending. Use `group_by[cluster]` or `group_by[project]` (not together) for aggregated rows with summed capacity freed and savings.",
+        "description": "Returns per-namespace Kubernetes ResourceQuota right-sizing recommendations for the authenticated organization. Compares configured quota hard limits and observed usage against aggregated container recommendation totals, then classifies each namespace as tighten (reduce over-provisioned quota), raise (usage approaching limits), or optimal. Default sort order is namespace ascending. Use `order_by` and `order_how` to sort by namespace, utilization, estimated_monthly_savings, or risk_level. Use `group_by[cluster]` or `group_by[project]` (not together) for aggregated rows with summed capacity freed and savings.",
         "operationId": "getQuotaRecommendations",
         "x-plugin-required": "quota",
         "parameters": [
@@ -3536,6 +3536,34 @@
               "default": 0,
               "minimum": 0
             }
+          },
+          {
+            "name": "order_by",
+            "in": "query",
+            "description": "Sort field. Bracket form `order_by[field]` is also accepted.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "namespace",
+                "utilization",
+                "estimated_monthly_savings",
+                "risk_level"
+              ],
+              "default": "namespace"
+            }
+          },
+          {
+            "name": "order_how",
+            "in": "query",
+            "description": "Sort direction when `order_by` is set (default desc). Default list order without `order_by` remains namespace ascending.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "default": "desc"
+            }
           }
         ],
         "responses": {
@@ -3560,6 +3588,58 @@
           },
           "503": {
             "description": "Service unavailable due to a database error"
+          }
+        }
+      }
+    },
+    "/recommendations/openshift/quota/detail": {
+      "get": {
+        "tags": [
+          "Quota Recommendations"
+        ],
+        "summary": "Get namespace ResourceQuota recommendation detail",
+        "description": "Returns full quota metrics, headroom basis points, notification codes, and historical recommendation snapshots for one namespace.",
+        "operationId": "getQuotaRecommendationDetail",
+        "x-plugin-required": "quota",
+        "parameters": [
+          {
+            "name": "cluster_uuid",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "namespace",
+            "in": "query",
+            "required": true,
+            "description": "Namespace (project). Alias: `filter[project]`.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Quota recommendation detail",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuotaRecommendationDetailResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing required query parameters"
+          },
+          "404": {
+            "description": "Quota recommendation not found"
+          },
+          "503": {
+            "description": "Service unavailable"
           }
         }
       }
@@ -3742,6 +3822,34 @@
               "default": 0,
               "minimum": 0
             }
+          },
+          {
+            "name": "order_by",
+            "in": "query",
+            "description": "Sort field. Bracket form `order_by[field]` is also accepted.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "cluster_quota_name",
+                "utilization",
+                "estimated_monthly_savings",
+                "risk_level"
+              ],
+              "default": "cluster_quota_name"
+            }
+          },
+          {
+            "name": "order_how",
+            "in": "query",
+            "description": "Sort direction (default desc).",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "default": "desc"
+            }
           }
         ],
         "responses": {
@@ -3763,6 +3871,56 @@
           },
           "503": {
             "description": "Service unavailable due to a database error"
+          }
+        }
+      }
+    },
+    "/recommendations/openshift/cluster-quota/detail": {
+      "get": {
+        "tags": [
+          "Cluster Quota Recommendations"
+        ],
+        "summary": "Get ClusterResourceQuota recommendation detail",
+        "operationId": "getClusterQuotaRecommendationDetail",
+        "x-plugin-required": "cluster-quota",
+        "parameters": [
+          {
+            "name": "cluster_uuid",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "cluster_quota_name",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cluster-quota recommendation detail",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClusterQuotaRecommendationDetailResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing required query parameters"
+          },
+          "404": {
+            "description": "Cluster-quota recommendation not found"
+          },
+          "503": {
+            "description": "Service unavailable"
           }
         }
       }
@@ -8380,9 +8538,93 @@
             "format": "date-time",
             "description": "Timestamp of the latest observation used for this recommendation (RFC3339 UTC)"
           },
+          "notifications": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/NotificationEntry"
+            },
+            "description": "Kruize-compatible notification map (codes 70–72 for quota)"
+          },
           "count": {
             "type": "integer",
             "description": "Number of namespace rows in this group (present only when group_by[cluster] or group_by[project] is used)"
+          }
+        }
+      },
+      "QuotaRecommendationDetailResponse": {
+        "type": "object",
+        "properties": {
+          "cluster_uuid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "namespace": {
+            "type": "string"
+          },
+          "recommendation_type": {
+            "type": "string"
+          },
+          "risk_level": {
+            "type": "string"
+          },
+          "headroom_basis_points": {
+            "type": "integer",
+            "description": "Headroom multiplier in basis points (e.g. 12000 = 110%)"
+          },
+          "quota_hard": {
+            "$ref": "#/components/schemas/QuotaResourceValues"
+          },
+          "quota_used": {
+            "$ref": "#/components/schemas/QuotaResourceValues"
+          },
+          "quota_recommended": {
+            "$ref": "#/components/schemas/QuotaResourceValues"
+          },
+          "utilization": {
+            "$ref": "#/components/schemas/QuotaUtilizationPercents"
+          },
+          "capacity_freed": {
+            "$ref": "#/components/schemas/QuotaCapacityFreed"
+          },
+          "estimated_savings": {
+            "$ref": "#/components/schemas/SavingsObject",
+            "nullable": true
+          },
+          "notifications": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/NotificationEntry"
+            }
+          },
+          "last_observed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "history": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuotaRecommendationHistoryEntry"
+            }
+          }
+        }
+      },
+      "QuotaRecommendationHistoryEntry": {
+        "type": "object",
+        "properties": {
+          "recorded_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "recommendation_type": {
+            "type": "string"
+          },
+          "risk_level": {
+            "type": "string"
+          },
+          "max_utilization_percent": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
           }
         }
       },
@@ -8691,6 +8933,55 @@
           },
           "estimated_savings": {
             "$ref": "#/components/schemas/ClusterQuotaSavingsMonthly"
+          },
+          "notifications": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/NotificationEntry"
+            },
+            "description": "Kruize-compatible notification map (code 73 when CRQ is at capacity)"
+          }
+        }
+      },
+      "ClusterQuotaRecommendationDetailResponse": {
+        "type": "object",
+        "properties": {
+          "cluster_uuid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "cluster_quota_name": {
+            "type": "string"
+          },
+          "recommendation_type": {
+            "type": "string"
+          },
+          "risk_level": {
+            "type": "string"
+          },
+          "quota_hard": {
+            "$ref": "#/components/schemas/ClusterQuotaResourceValues"
+          },
+          "quota_used": {
+            "$ref": "#/components/schemas/ClusterQuotaResourceValues"
+          },
+          "quota_recommended": {
+            "$ref": "#/components/schemas/ClusterQuotaResourceValues"
+          },
+          "utilization": {
+            "$ref": "#/components/schemas/ClusterQuotaUtilizationPercents"
+          },
+          "capacity_freed": {
+            "$ref": "#/components/schemas/ClusterQuotaCapacityFreed"
+          },
+          "estimated_savings": {
+            "$ref": "#/components/schemas/ClusterQuotaSavingsMonthly"
+          },
+          "notifications": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/NotificationEntry"
+            }
           }
         }
       },
