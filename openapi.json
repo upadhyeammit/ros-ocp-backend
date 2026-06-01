@@ -6619,6 +6619,9 @@
           "power_schedule": {
             "$ref": "#/components/schemas/VMPowerScheduleSettings"
           },
+          "network_qos": {
+            "$ref": "#/components/schemas/VMNetworkQoSSettings"
+          },
           "instance_type_matching": {
             "type": "boolean"
           },
@@ -6637,7 +6640,7 @@
       },
       "VMSettingsUpdate": {
         "type": "object",
-        "description": "Partial VM settings update. Any subset of thresholds, memory_floors, disk, io, network, gpu, placement, power_schedule, instance_type_matching, cpu_adaptive_margin_enabled, stability.",
+        "description": "Partial VM settings update. Any subset of thresholds, memory_floors, disk, io, network, gpu, placement, power_schedule, network_qos, instance_type_matching, cpu_adaptive_margin_enabled, stability.",
         "properties": {
           "cpu_adaptive_margin_enabled": {
             "type": "boolean"
@@ -6668,6 +6671,9 @@
           },
           "power_schedule": {
             "$ref": "#/components/schemas/VMPowerScheduleSettings"
+          },
+          "network_qos": {
+            "$ref": "#/components/schemas/VMNetworkQoSSettings"
           },
           "instance_type_matching": {
             "type": "boolean"
@@ -9388,6 +9394,34 @@
             "minimum": 0.01,
             "maximum": 1,
             "description": "Fraction of observed days that must be idle to qualify (default 0.7)"
+          }
+        }
+      },
+      "VMNetworkQoSSettings": {
+        "type": "object",
+        "description": "Simplified network QoS hints for network-bound VMs (notifications 65–66). Full NIC-type recommendations are future work.",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "When true, emit SR-IOV and DPDK hint notifications for network-bound VMs"
+          },
+          "sriov_drop_threshold": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Packet drop ratio (0–1) at or above which to suggest SR-IOV (default 0.01)"
+          },
+          "sriov_throughput_bps": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1,
+            "description": "Throughput in bits/sec at or above which to suggest SR-IOV even without drops (default 5000000000)"
+          },
+          "dpdk_pps_threshold": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1,
+            "description": "Packets per second at or above which to suggest DPDK for small-packet workloads (default 500000)"
           }
         }
       },
