@@ -8974,6 +8974,52 @@
               "$ref": "#/components/schemas/NotificationEntry"
             },
             "description": "Kruize-compatible notification map (code 73 when CRQ is at capacity)"
+          },
+          "namespaces": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Namespaces matched by the ClusterResourceQuota selector (operator namespaces column)"
+          }
+        }
+      },
+      "ClusterQuotaRecommendationHistoryEntry": {
+        "type": "object",
+        "properties": {
+          "recorded_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "resource": {
+            "type": "string",
+            "description": "Resource dimension (cpu_request, memory_request, storage_request, pods)"
+          },
+          "recommendation_type": {
+            "type": "string"
+          },
+          "risk_level": {
+            "type": "string"
+          },
+          "recommended_hard": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "current_hard": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "current_used": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "utilization_percent": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Utilization percentage for this resource at recorded_at"
           }
         }
       },
@@ -9016,6 +9062,20 @@
             "additionalProperties": {
               "$ref": "#/components/schemas/NotificationEntry"
             }
+          },
+          "namespaces": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Namespaces matched by the ClusterResourceQuota selector"
+          },
+          "history": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClusterQuotaRecommendationHistoryEntry"
+            },
+            "description": "Per-resource recommendation snapshots (newest first)"
           }
         }
       },
