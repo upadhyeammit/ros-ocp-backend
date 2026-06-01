@@ -7735,6 +7735,11 @@
           "cluster_uuid": {
             "type": "string"
           },
+          "instance_type": {
+            "type": "string",
+            "description": "Cloud or cluster instance type from node metrics (e.g. m5.xlarge). Omitted when unknown.",
+            "example": "m5.xlarge"
+          },
           "recommendation_type": {
             "type": "string",
             "example": "cpu_memory_utilization"
