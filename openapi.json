@@ -6616,6 +6616,9 @@
           "placement": {
             "$ref": "#/components/schemas/VMPlacementSettings"
           },
+          "power_schedule": {
+            "$ref": "#/components/schemas/VMPowerScheduleSettings"
+          },
           "instance_type_matching": {
             "type": "boolean"
           },
@@ -6634,7 +6637,7 @@
       },
       "VMSettingsUpdate": {
         "type": "object",
-        "description": "Partial VM settings update. Any subset of thresholds, memory_floors, disk, io, network, gpu, placement, instance_type_matching, cpu_adaptive_margin_enabled, stability.",
+        "description": "Partial VM settings update. Any subset of thresholds, memory_floors, disk, io, network, gpu, placement, power_schedule, instance_type_matching, cpu_adaptive_margin_enabled, stability.",
         "properties": {
           "cpu_adaptive_margin_enabled": {
             "type": "boolean"
@@ -6662,6 +6665,9 @@
           },
           "placement": {
             "$ref": "#/components/schemas/VMPlacementSettings"
+          },
+          "power_schedule": {
+            "$ref": "#/components/schemas/VMPowerScheduleSettings"
           },
           "instance_type_matching": {
             "type": "boolean"
@@ -8737,6 +8743,16 @@
             "type": "boolean",
             "description": "True when recommended memory exceeds ROS_VM_NUMA_NODE_MEMORY_GIB (per-NUMA cap until host topology is ingested)"
           },
+          "is_power_off_candidate": {
+            "type": "boolean",
+            "description": "True when the VM is idle on most observed days but still shows occasional activity (periodically idle)"
+          },
+          "power_off_idle_pct": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true,
+            "description": "Percent of observed days classified as idle when is_power_off_candidate is true"
+          },
           "preference_name": {
             "type": "string",
             "nullable": true
@@ -9350,6 +9366,28 @@
           "enable_network_series": {
             "type": "boolean",
             "description": "When true, network-bound VMs may receive n1 instance types"
+          }
+        }
+      },
+      "VMPowerScheduleSettings": {
+        "type": "object",
+        "description": "Power-off scheduling detection for periodically idle VMs (notification 64)",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "When true, detect VMs that are idle on most days but still show occasional activity"
+          },
+          "min_idle_days": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1,
+            "description": "Minimum days of digest history required (default 14)"
+          },
+          "idle_ratio_threshold": {
+            "type": "number",
+            "minimum": 0.01,
+            "maximum": 1,
+            "description": "Fraction of observed days that must be idle to qualify (default 0.7)"
           }
         }
       },
