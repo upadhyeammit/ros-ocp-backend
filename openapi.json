@@ -5037,6 +5037,97 @@
         }
       }
     },
+    "/recommendations/openshift/namespaces/{recommendation-id}/history": {
+      "get": {
+        "tags": [
+          "Namespace Recommendations"
+        ],
+        "summary": "Get historical namespace recommendations",
+        "description": "Returns prior namespace recommendation snapshots from `historical_namespace_recommendation_sets` for the namespace identified by `recommendation-id`. Each database snapshot is expanded into separate `cpu` and `memory` rows.",
+        "operationId": "getNamespaceRecommendationHistory",
+        "x-plugin-required": "namespace",
+        "parameters": [
+          {
+            "name": "recommendation-id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "filter[term]",
+            "in": "query",
+            "description": "Filter by recommendation term (`short`, `medium`, `long`, or `short_term`, `medium_term`, `long_term`).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[engine]",
+            "in": "query",
+            "description": "Filter by recommendation engine (`cost` or `performance`).",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "cost",
+                "performance"
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of historical snapshots to return (default 30, max 90). Each snapshot expands to two rows (cpu and memory).",
+            "schema": {
+              "type": "integer",
+              "default": 30,
+              "minimum": 1,
+              "maximum": 90
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Namespace recommendation history",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NamespaceRecommendationHistoryResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query parameters or request body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ROSAPIError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User is not authorized (RBAC)"
+          },
+          "404": {
+            "description": "Recommendation not found or plugin disabled"
+          },
+          "503": {
+            "description": "Service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ROSAPIError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/internal/tags/sync": {
       "post": {
         "tags": [
@@ -9685,6 +9776,114 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/VMRecommendationItem"
+            }
+          }
+        }
+      },
+      "NamespaceHistoryResourceValues": {
+        "type": "object",
+        "properties": {
+          "request_millicores": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "limit_millicores": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "request_kib": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "limit_kib": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "NamespaceHistoryUtilization": {
+        "type": "object",
+        "properties": {
+          "request_variation_percent": {
+            "type": "number",
+            "format": "float"
+          },
+          "limit_variation_percent": {
+            "type": "number",
+            "format": "float"
+          }
+        }
+      },
+      "NamespaceRecommendationHistoryRow": {
+        "type": "object",
+        "properties": {
+          "resource": {
+            "type": "string",
+            "enum": [
+              "cpu",
+              "memory"
+            ]
+          },
+          "recommendation_type": {
+            "type": "string",
+            "enum": [
+              "cost",
+              "performance"
+            ]
+          },
+          "term": {
+            "type": "string"
+          },
+          "schedule_type": {
+            "type": "string"
+          },
+          "recorded_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "recommended": {
+            "$ref": "#/components/schemas/NamespaceHistoryResourceValues"
+          },
+          "current": {
+            "$ref": "#/components/schemas/NamespaceHistoryResourceValues"
+          },
+          "utilization": {
+            "$ref": "#/components/schemas/NamespaceHistoryUtilization"
+          },
+          "confidence_level": {
+            "type": "number",
+            "format": "float"
+          },
+          "notification_codes": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        }
+      },
+      "NamespaceRecommendationHistoryResponse": {
+        "type": "object",
+        "properties": {
+          "meta": {
+            "type": "object",
+            "properties": {
+              "count": {
+                "type": "integer"
+              }
+            }
+          },
+          "links": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NamespaceRecommendationHistoryRow"
             }
           }
         }
