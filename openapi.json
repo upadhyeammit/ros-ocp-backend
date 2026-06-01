@@ -4056,7 +4056,7 @@
           "Threshold Settings"
         ],
         "summary": "Get recommendation threshold settings",
-        "description": "Returns merged threshold settings for the given recommendation_type (container, namespace, node, gpu, or pvc). Fields locked by environment variables appear in locked_fields.",
+        "description": "Returns merged threshold settings for the given recommendation_type (container, namespace, node, gpu, or pvc). Fields locked by environment variables appear in locked_fields. Deprecated: use the dedicated /settings/{container|namespace|node|gpu|pvc} path instead.",
         "operationId": "getThresholdSettings",
         "parameters": [
           {
@@ -4109,14 +4109,15 @@
           "503": {
             "description": "Service unavailable due to a database error"
           }
-        }
+        },
+        "deprecated": true
       },
       "put": {
         "tags": [
           "Threshold Settings"
         ],
         "summary": "Update recommendation threshold settings",
-        "description": "Stores per-organization threshold overrides for the given recommendation_type. Partial updates supported. Returns 403 if any requested field is locked by an environment variable.",
+        "description": "Stores per-organization threshold overrides for the given recommendation_type. Partial updates supported. Returns 403 if any requested field is locked by an environment variable. Deprecated: use the dedicated /settings/{container|namespace|node|gpu|pvc} path instead.",
         "operationId": "putThresholdSettings",
         "parameters": [
           {
@@ -4182,14 +4183,15 @@
           "503": {
             "description": "Service unavailable due to a database error"
           }
-        }
+        },
+        "deprecated": true
       },
       "delete": {
         "tags": [
           "Threshold Settings"
         ],
         "summary": "Reset recommendation threshold settings",
-        "description": "Removes tenant overrides for the given recommendation_type so env/compiled defaults apply.",
+        "description": "Removes tenant overrides for the given recommendation_type so env/compiled defaults apply. Deprecated: use the dedicated /settings/{container|namespace|node|gpu|pvc} path instead.",
         "operationId": "deleteThresholdSettings",
         "parameters": [
           {
@@ -4228,7 +4230,8 @@
           "503": {
             "description": "Service unavailable due to a database error"
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/recommendations/openshift/settings/vm": {
@@ -4857,6 +4860,656 @@
           },
           "503": {
             "description": "Service unavailable"
+          }
+        }
+      }
+    },
+    "/recommendations/openshift/settings/container": {
+      "get": {
+        "tags": [
+          "Threshold Settings"
+        ],
+        "summary": "Get container recommendation threshold settings",
+        "description": "Returns merged threshold settings for the container plugin. Fields locked by environment variables appear in locked_fields.",
+        "operationId": "getContainerThresholdSettings",
+        "responses": {
+          "200": {
+            "description": "Current threshold settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "locked_fields": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Fields locked by environment variables or ROS_SETTINGS_LOCKED ([\"*\"] when all tenant overrides are frozen)"
+                    },
+                    "settings_locked": {
+                      "type": "boolean",
+                      "description": "True when ROS_SETTINGS_LOCKED prevents tenant threshold overrides for this recommendation_type"
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing or invalid recommendation_type"
+          },
+          "403": {
+            "description": "User is not authorized (RBAC)"
+          },
+          "503": {
+            "description": "Service unavailable due to a database error"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Threshold Settings"
+        ],
+        "summary": "Update container recommendation threshold settings",
+        "description": "Stores per-organization threshold overrides for the container plugin. Partial updates supported. Returns 403 if any requested field is locked.",
+        "operationId": "putContainerThresholdSettings",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated threshold settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "locked_fields": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body or recommendation_type"
+          },
+          "403": {
+            "description": "Field locked by environment variable, tenant settings globally locked (ROS_SETTINGS_LOCKED), or RBAC denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsLockedForbiddenResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable due to a database error"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Threshold Settings"
+        ],
+        "summary": "Reset container recommendation threshold settings",
+        "description": "Removes tenant overrides for the container plugin so env/compiled defaults apply.",
+        "operationId": "deleteContainerThresholdSettings",
+        "responses": {
+          "204": {
+            "description": "Tenant overrides removed"
+          },
+          "400": {
+            "description": "Missing or invalid recommendation_type"
+          },
+          "403": {
+            "description": "Tenant settings globally locked (ROS_SETTINGS_LOCKED), field locked by environment variable, or RBAC denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsLockedForbiddenResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable due to a database error"
+          }
+        }
+      }
+    },
+    "/recommendations/openshift/settings/namespace": {
+      "get": {
+        "tags": [
+          "Threshold Settings"
+        ],
+        "summary": "Get namespace recommendation threshold settings",
+        "description": "Returns merged threshold settings for the namespace plugin. Fields locked by environment variables appear in locked_fields.",
+        "operationId": "getNamespaceThresholdSettings",
+        "responses": {
+          "200": {
+            "description": "Current threshold settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "locked_fields": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Fields locked by environment variables or ROS_SETTINGS_LOCKED ([\"*\"] when all tenant overrides are frozen)"
+                    },
+                    "settings_locked": {
+                      "type": "boolean",
+                      "description": "True when ROS_SETTINGS_LOCKED prevents tenant threshold overrides for this recommendation_type"
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing or invalid recommendation_type"
+          },
+          "403": {
+            "description": "User is not authorized (RBAC)"
+          },
+          "503": {
+            "description": "Service unavailable due to a database error"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Threshold Settings"
+        ],
+        "summary": "Update namespace recommendation threshold settings",
+        "description": "Stores per-organization threshold overrides for the namespace plugin. Partial updates supported. Returns 403 if any requested field is locked.",
+        "operationId": "putNamespaceThresholdSettings",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated threshold settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "locked_fields": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body or recommendation_type"
+          },
+          "403": {
+            "description": "Field locked by environment variable, tenant settings globally locked (ROS_SETTINGS_LOCKED), or RBAC denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsLockedForbiddenResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable due to a database error"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Threshold Settings"
+        ],
+        "summary": "Reset namespace recommendation threshold settings",
+        "description": "Removes tenant overrides for the namespace plugin so env/compiled defaults apply.",
+        "operationId": "deleteNamespaceThresholdSettings",
+        "responses": {
+          "204": {
+            "description": "Tenant overrides removed"
+          },
+          "400": {
+            "description": "Missing or invalid recommendation_type"
+          },
+          "403": {
+            "description": "Tenant settings globally locked (ROS_SETTINGS_LOCKED), field locked by environment variable, or RBAC denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsLockedForbiddenResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable due to a database error"
+          }
+        }
+      }
+    },
+    "/recommendations/openshift/settings/node": {
+      "get": {
+        "tags": [
+          "Threshold Settings"
+        ],
+        "summary": "Get node recommendation threshold settings",
+        "description": "Returns merged threshold settings for the node plugin. Fields locked by environment variables appear in locked_fields.",
+        "operationId": "getNodeThresholdSettings",
+        "responses": {
+          "200": {
+            "description": "Current threshold settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "locked_fields": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Fields locked by environment variables or ROS_SETTINGS_LOCKED ([\"*\"] when all tenant overrides are frozen)"
+                    },
+                    "settings_locked": {
+                      "type": "boolean",
+                      "description": "True when ROS_SETTINGS_LOCKED prevents tenant threshold overrides for this recommendation_type"
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing or invalid recommendation_type"
+          },
+          "403": {
+            "description": "User is not authorized (RBAC)"
+          },
+          "503": {
+            "description": "Service unavailable due to a database error"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Threshold Settings"
+        ],
+        "summary": "Update node recommendation threshold settings",
+        "description": "Stores per-organization threshold overrides for the node plugin. Partial updates supported. Returns 403 if any requested field is locked.",
+        "operationId": "putNodeThresholdSettings",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated threshold settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "locked_fields": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body or recommendation_type"
+          },
+          "403": {
+            "description": "Field locked by environment variable, tenant settings globally locked (ROS_SETTINGS_LOCKED), or RBAC denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsLockedForbiddenResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable due to a database error"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Threshold Settings"
+        ],
+        "summary": "Reset node recommendation threshold settings",
+        "description": "Removes tenant overrides for the node plugin so env/compiled defaults apply.",
+        "operationId": "deleteNodeThresholdSettings",
+        "responses": {
+          "204": {
+            "description": "Tenant overrides removed"
+          },
+          "400": {
+            "description": "Missing or invalid recommendation_type"
+          },
+          "403": {
+            "description": "Tenant settings globally locked (ROS_SETTINGS_LOCKED), field locked by environment variable, or RBAC denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsLockedForbiddenResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable due to a database error"
+          }
+        }
+      }
+    },
+    "/recommendations/openshift/settings/gpu": {
+      "get": {
+        "tags": [
+          "Threshold Settings"
+        ],
+        "summary": "Get gpu recommendation threshold settings",
+        "description": "Returns merged threshold settings for the gpu plugin. Fields locked by environment variables appear in locked_fields.",
+        "operationId": "getGpuThresholdSettings",
+        "responses": {
+          "200": {
+            "description": "Current threshold settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "locked_fields": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Fields locked by environment variables or ROS_SETTINGS_LOCKED ([\"*\"] when all tenant overrides are frozen)"
+                    },
+                    "settings_locked": {
+                      "type": "boolean",
+                      "description": "True when ROS_SETTINGS_LOCKED prevents tenant threshold overrides for this recommendation_type"
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing or invalid recommendation_type"
+          },
+          "403": {
+            "description": "User is not authorized (RBAC)"
+          },
+          "503": {
+            "description": "Service unavailable due to a database error"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Threshold Settings"
+        ],
+        "summary": "Update gpu recommendation threshold settings",
+        "description": "Stores per-organization threshold overrides for the gpu plugin. Partial updates supported. Returns 403 if any requested field is locked.",
+        "operationId": "putGpuThresholdSettings",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated threshold settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "locked_fields": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body or recommendation_type"
+          },
+          "403": {
+            "description": "Field locked by environment variable, tenant settings globally locked (ROS_SETTINGS_LOCKED), or RBAC denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsLockedForbiddenResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable due to a database error"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Threshold Settings"
+        ],
+        "summary": "Reset gpu recommendation threshold settings",
+        "description": "Removes tenant overrides for the gpu plugin so env/compiled defaults apply.",
+        "operationId": "deleteGpuThresholdSettings",
+        "responses": {
+          "204": {
+            "description": "Tenant overrides removed"
+          },
+          "400": {
+            "description": "Missing or invalid recommendation_type"
+          },
+          "403": {
+            "description": "Tenant settings globally locked (ROS_SETTINGS_LOCKED), field locked by environment variable, or RBAC denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsLockedForbiddenResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable due to a database error"
+          }
+        }
+      }
+    },
+    "/recommendations/openshift/settings/pvc": {
+      "get": {
+        "tags": [
+          "Threshold Settings"
+        ],
+        "summary": "Get pvc recommendation threshold settings",
+        "description": "Returns merged threshold settings for the pvc plugin. Fields locked by environment variables appear in locked_fields.",
+        "operationId": "getPvcThresholdSettings",
+        "responses": {
+          "200": {
+            "description": "Current threshold settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "locked_fields": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Fields locked by environment variables or ROS_SETTINGS_LOCKED ([\"*\"] when all tenant overrides are frozen)"
+                    },
+                    "settings_locked": {
+                      "type": "boolean",
+                      "description": "True when ROS_SETTINGS_LOCKED prevents tenant threshold overrides for this recommendation_type"
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing or invalid recommendation_type"
+          },
+          "403": {
+            "description": "User is not authorized (RBAC)"
+          },
+          "503": {
+            "description": "Service unavailable due to a database error"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Threshold Settings"
+        ],
+        "summary": "Update pvc recommendation threshold settings",
+        "description": "Stores per-organization threshold overrides for the pvc plugin. Partial updates supported. Returns 403 if any requested field is locked.",
+        "operationId": "putPvcThresholdSettings",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated threshold settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "locked_fields": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body or recommendation_type"
+          },
+          "403": {
+            "description": "Field locked by environment variable, tenant settings globally locked (ROS_SETTINGS_LOCKED), or RBAC denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsLockedForbiddenResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable due to a database error"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Threshold Settings"
+        ],
+        "summary": "Reset pvc recommendation threshold settings",
+        "description": "Removes tenant overrides for the pvc plugin so env/compiled defaults apply.",
+        "operationId": "deletePvcThresholdSettings",
+        "responses": {
+          "204": {
+            "description": "Tenant overrides removed"
+          },
+          "400": {
+            "description": "Missing or invalid recommendation_type"
+          },
+          "403": {
+            "description": "Tenant settings globally locked (ROS_SETTINGS_LOCKED), field locked by environment variable, or RBAC denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsLockedForbiddenResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable due to a database error"
           }
         }
       }
