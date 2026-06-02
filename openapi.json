@@ -2837,10 +2837,36 @@
             "in": "query",
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "Legacy flat alias for filter[term] (short, medium, long)."
+          },
+          {
+            "name": "filter[term]",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "short",
+                "medium",
+                "long"
+              ]
+            },
+            "description": "Filter rows to a recommendation term window."
           },
           {
             "name": "engine",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "cost",
+                "performance"
+              ]
+            },
+            "description": "Legacy flat alias for filter[engine]. Include only this engine in `recommendation_engines`. When omitted, both cost and performance are returned."
+          },
+          {
+            "name": "filter[engine]",
             "in": "query",
             "schema": {
               "type": "string",
@@ -2872,6 +2898,35 @@
                 "false"
               ]
             }
+          },
+          {
+            "name": "filter[stranded_resource]",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "cpu",
+                "memory",
+                "none"
+              ]
+            },
+            "description": "Filter by stranded resource classification. Use `none` for nodes with no stranded imbalance."
+          },
+          {
+            "name": "filter[instance_type]",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Exact match on operator-reported instance type (e.g. m5.2xlarge)."
+          },
+          {
+            "name": "filter[machineset_name]",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Exact match on OpenShift MachineSet name from node digest labels."
           },
           {
             "name": "filter[idle_state]",
@@ -2967,6 +3022,61 @@
           },
           "404": {
             "description": "Plugin disabled \u2014 enable the `node` plugin via ROS_ENABLED_PLUGINS"
+          },
+          "503": {
+            "description": "Service unavailable"
+          }
+        }
+      }
+    },
+    "/recommendations/openshift/nodes/{node}": {
+      "get": {
+        "tags": [
+          "Node Recommendations"
+        ],
+        "summary": "Get node CPU and memory utilization recommendation detail",
+        "description": "Returns full recommendation data for a single node: all term windows, both engines, notifications, pod scheduling headroom, and fleet-based instance type suggestions when applicable.",
+        "operationId": "getNodeUtilizationRecommendationDetail",
+        "x-plugin-required": "node",
+        "parameters": [
+          {
+            "name": "node",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Kubernetes node name"
+          },
+          {
+            "name": "cluster_uuid",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Optional cluster scope when the node name is not unique across clusters"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Node utilization recommendation detail",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NodeUtilizationDetailRec"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "403": {
+            "description": "User is not authorized (RBAC)"
+          },
+          "404": {
+            "description": "Node not found or node plugin disabled"
           },
           "503": {
             "description": "Service unavailable"
@@ -5128,6 +5238,47 @@
         }
       }
     },
+    "/internal/recalculate-savings": {
+      "post": {
+        "tags": [
+          "Internal"
+        ],
+        "summary": "Recalculate persisted recommendation savings after cost model changes",
+        "description": "Service-to-service endpoint (requires ROS_SAVINGS_ESTIMATES_ENABLED and ROS_SAVINGS_RECALCULATION_ENABLED). Accepts a service account bearer token (same auth as tag sync). Runs savings-only recalculation asynchronously for container, node, and/or PVC recommendation types.",
+        "operationId": "postInternalRecalculateSavings",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SavingsRecalcRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Recalculation accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SavingsRecalcResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Savings estimates or recalculation disabled"
+          }
+        }
+      }
+    },
     "/internal/tags/sync": {
       "post": {
         "tags": [
@@ -6265,7 +6416,7 @@
           },
           "code": {
             "type": "integer",
-            "description": "Numeric notification code (see notification_code_definitions table)",
+            "description": "Numeric notification code (see notification_code_definitions table). Node examples: 11 underutilized, 12 overcommitted, 13 stranded resources, 15 idle/zombie, 74 pod scheduling limit.",
             "example": 1
           }
         }
@@ -8152,6 +8303,18 @@
             "type": "integer",
             "format": "int64"
           },
+          "pod_capacity": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true,
+            "description": "Max schedulable pods on the node when reported by the operator (node_capacity_pods / pod_capacity)."
+          },
+          "pod_scheduling_headroom": {
+            "type": "number",
+            "format": "float",
+            "nullable": true,
+            "description": "Fraction of unused pod slots: (pod_capacity - pod_count) / pod_capacity when capacity is known."
+          },
           "cpu_overcommit_ratio": {
             "type": "number",
             "format": "float"
@@ -8166,6 +8329,86 @@
               "$ref": "#/components/schemas/NodeUtilizationTermRec"
             },
             "description": "Keys are `short_term`, `medium_term`, and `long_term`."
+          },
+          "machineset_name": {
+            "type": "string",
+            "description": "OpenShift MachineSet name when reported by the operator."
+          },
+          "suggested_instance_type": {
+            "type": "string",
+            "description": "Alternative instance type already present in the cluster that better matches stranded CPU/memory (Tier 1 fleet recommendation)."
+          },
+          "instance_type_reason": {
+            "type": "string",
+            "description": "Human-readable explanation for suggested_instance_type."
+          }
+        }
+      },
+      "NodeUtilizationDetailRec": {
+        "type": "object",
+        "description": "Single-node detail response (not paginated).",
+        "properties": {
+          "node": {
+            "type": "string"
+          },
+          "cluster_uuid": {
+            "type": "string"
+          },
+          "instance_type": {
+            "type": "string"
+          },
+          "machineset_name": {
+            "type": "string"
+          },
+          "pod_count": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pod_capacity": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "pod_scheduling_headroom": {
+            "type": "number",
+            "format": "float",
+            "nullable": true
+          },
+          "idle_state": {
+            "type": "string",
+            "enum": [
+              "active",
+              "idle",
+              "zombie"
+            ]
+          },
+          "suggested_instance_type": {
+            "type": "string"
+          },
+          "instance_type_reason": {
+            "type": "string"
+          },
+          "metrics": {
+            "$ref": "#/components/schemas/NodeUtilizationMetrics"
+          },
+          "cpu_overcommit_ratio": {
+            "type": "number",
+            "format": "float"
+          },
+          "trend_slope": {
+            "type": "number",
+            "format": "float"
+          },
+          "recommendation_terms": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/NodeUtilizationTermRec"
+            }
+          },
+          "notifications": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Primary notifications from medium-term cost engine when present."
           }
         }
       },
@@ -8811,6 +9054,56 @@
             "type": "array",
             "items": {
               "type": "object"
+            }
+          }
+        }
+      },
+      "SavingsRecalcRequest": {
+        "type": "object",
+        "required": [
+          "org_id"
+        ],
+        "properties": {
+          "org_id": {
+            "type": "string",
+            "description": "Organization ID (tenant scope for savings recalculation)."
+          },
+          "cluster_uuid": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Optional cluster UUID to limit recalculation to one cluster."
+          },
+          "recommendation_types": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "container",
+                "node",
+                "pvc"
+              ]
+            },
+            "description": "Recommendation types to recalculate. At least one of container, node, or pvc is required."
+          }
+        }
+      },
+      "SavingsRecalcResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "accepted"
+          },
+          "org_id": {
+            "type": "string"
+          },
+          "cluster_uuid": {
+            "type": "string"
+          },
+          "recommendation_types": {
+            "type": "array",
+            "items": {
+              "type": "string"
             }
           }
         }
