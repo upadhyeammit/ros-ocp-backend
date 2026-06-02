@@ -4291,6 +4291,151 @@
         }
       }
     },
+    "/recommendations/openshift/snapshots/summary": {
+      "get": {
+        "tags": [
+          "Snapshot Recommendations"
+        ],
+        "summary": "Aggregate snapshot recommendations by namespace or cluster",
+        "description": "Returns rolled-up VolumeSnapshot metrics per namespace (default) or per cluster. Use reclaimable fields to prioritize namespaces with orphaned, stale, never-restored, or redundant snapshots (excludes active and managed).",
+        "operationId": "getSnapshotSummary",
+        "parameters": [
+          {
+            "name": "group_by",
+            "in": "query",
+            "description": "Aggregation dimension: project (namespace) or cluster",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "project",
+                "cluster"
+              ],
+              "default": "project"
+            }
+          },
+          {
+            "name": "filter[cluster]",
+            "in": "query",
+            "description": "Filter by cluster UUID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "filter[project]",
+            "in": "query",
+            "description": "Filter by namespace (exact match or wildcard with *)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "order_by",
+            "in": "query",
+            "description": "Sort field",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "reclaimable_monthly_holding_cost_usd",
+                "reclaimable_restore_size_gib",
+                "actionable_snapshot_count",
+                "snapshot_count"
+              ],
+              "default": "reclaimable_monthly_holding_cost_usd"
+            }
+          },
+          {
+            "name": "order_how",
+            "in": "query",
+            "description": "Sort direction",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "default": "desc"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of groups (1-100, default 10)",
+            "schema": {
+              "type": "integer",
+              "default": 10,
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Number of groups to skip",
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated snapshot summary groups",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "count": {
+                          "type": "integer"
+                        },
+                        "limit": {
+                          "type": "integer"
+                        },
+                        "offset": {
+                          "type": "integer"
+                        },
+                        "currency": {
+                          "type": "string",
+                          "description": "ISO 4217 currency code for cost fields",
+                          "example": "USD"
+                        }
+                      }
+                    },
+                    "links": {
+                      "type": "object"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/SnapshotSummaryResponse"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query parameters"
+          },
+          "401": {
+            "description": "Missing or invalid identity header"
+          },
+          "403": {
+            "description": "User is not authorized (RBAC)"
+          },
+          "503": {
+            "description": "Service unavailable due to a database error"
+          }
+        }
+      }
+    },
     "/recommendations/openshift/snapshots": {
       "get": {
         "tags": [
@@ -8378,6 +8523,77 @@
           }
         }
       },
+      "SnapshotSummaryAgeDaysRange": {
+        "type": "object",
+        "properties": {
+          "min": {
+            "type": "integer",
+            "description": "Minimum age_days among snapshots in the group"
+          },
+          "max": {
+            "type": "integer",
+            "description": "Maximum age_days among snapshots in the group"
+          }
+        }
+      },
+      "SnapshotSummaryResponse": {
+        "type": "object",
+        "properties": {
+          "namespace": {
+            "type": "string",
+            "description": "Kubernetes namespace (empty when group_by=cluster)"
+          },
+          "cluster_uuid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "snapshot_count": {
+            "type": "integer",
+            "description": "Total snapshots in the group"
+          },
+          "actionable_snapshot_count": {
+            "type": "integer",
+            "description": "Snapshots classified orphaned, stale, never_restored, or redundant"
+          },
+          "counts_by_type": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "description": "Counts keyed by recommendation_type (orphaned, stale, never_restored, redundant, managed, active)"
+          },
+          "total_restore_size_bytes": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "total_restore_size_gib": {
+            "type": "number",
+            "format": "double"
+          },
+          "reclaimable_restore_size_bytes": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Restore size for actionable types only"
+          },
+          "reclaimable_restore_size_gib": {
+            "type": "number",
+            "format": "double"
+          },
+          "total_monthly_holding_cost_usd": {
+            "type": "number",
+            "format": "double",
+            "description": "Sum of estimated_monthly_cost_usd (NULL treated as 0)"
+          },
+          "reclaimable_monthly_holding_cost_usd": {
+            "type": "number",
+            "format": "double",
+            "description": "Holding cost for actionable types only"
+          },
+          "age_days": {
+            "$ref": "#/components/schemas/SnapshotSummaryAgeDaysRange"
+          }
+        }
+      },
       "NodeUtilizationListResponse": {
         "type": "object",
         "properties": {
@@ -9366,10 +9582,12 @@
               "enum": [
                 "container",
                 "node",
-                "pvc"
+                "pvc",
+                "quota",
+                "cluster-quota"
               ]
             },
-            "description": "Recommendation types to recalculate. At least one of container, node, or pvc is required."
+            "description": "Recommendation types to recalculate. At least one of container, node, pvc, quota, or cluster-quota is required."
           }
         }
       },
