@@ -3029,6 +3029,118 @@
         }
       }
     },
+    "/recommendations/openshift/machinesets": {
+      "get": {
+        "tags": [
+          "Node Recommendations"
+        ],
+        "summary": "Get MachineSet utilization aggregation recommendations",
+        "description": "Aggregates per-node cost-engine recommendations by OpenShift MachineSet name. Groups nodes that share a non-empty `machineset_name`, sums fleet consolidation (`node_count_reduction`) and savings, and returns average CPU/memory P95 utilization across member nodes. Default term is `medium`. Pagination sorts by total monthly savings descending.",
+        "operationId": "getMachineSetRecommendations",
+        "x-plugin-required": "node",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 10
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          },
+          {
+            "name": "term",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "short",
+                "medium",
+                "long"
+              ]
+            },
+            "description": "Legacy flat alias for filter[term]. Default: medium."
+          },
+          {
+            "name": "filter[term]",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "short",
+                "medium",
+                "long"
+              ]
+            },
+            "description": "Recommendation term window (cost engine rows only)."
+          },
+          {
+            "name": "cluster_uuid",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Legacy flat alias for filter[cluster]."
+          },
+          {
+            "name": "filter[cluster]",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Restrict results to a single cluster UUID."
+          },
+          {
+            "name": "machineset_name",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Legacy flat alias for filter[machineset_name]."
+          },
+          {
+            "name": "filter[machineset_name]",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Exact match or wildcard (`*` → SQL LIKE). Nodes without MachineSet labels are excluded from this API."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "MachineSet aggregation recommendations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MachineSetRecommendationListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "403": {
+            "description": "User is not authorized (RBAC)"
+          },
+          "503": {
+            "description": "Service unavailable"
+          }
+        }
+      }
+    },
     "/recommendations/openshift/nodes/{node}": {
       "get": {
         "tags": [
@@ -8129,6 +8241,96 @@
           }
         }
       },
+      "MachineSetRecommendation": {
+        "type": "object",
+        "properties": {
+          "machineset_name": {
+            "type": "string"
+          },
+          "cluster_uuid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "cluster_alias": {
+            "type": "string",
+            "description": "Human-readable cluster name when configured in ROS."
+          },
+          "instance_type": {
+            "type": "string",
+            "description": "Operator-reported instance type (homogeneous within the MachineSet when labeled)."
+          },
+          "current_node_count": {
+            "type": "integer",
+            "description": "Distinct nodes in this MachineSet with recommendations."
+          },
+          "recommended_node_count": {
+            "type": "integer",
+            "description": "current_node_count minus summed node_count_reduction from fleet consolidation."
+          },
+          "excess_nodes": {
+            "type": "integer",
+            "description": "Sum of node_count_reduction across nodes in the group."
+          },
+          "total_monthly_savings_usd": {
+            "type": "number",
+            "format": "double",
+            "description": "Sum of estimated_monthly_savings_usd for member nodes (USD)."
+          },
+          "avg_cpu_utilization": {
+            "type": "number",
+            "format": "float",
+            "description": "Average CPU P95 utilization (0.0–1.0) across member nodes."
+          },
+          "avg_memory_utilization": {
+            "type": "number",
+            "format": "float",
+            "description": "Average memory P95 utilization (0.0–1.0) across member nodes."
+          },
+          "nodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Node names belonging to this MachineSet."
+          }
+        }
+      },
+      "MachineSetRecommendationListResponse": {
+        "type": "object",
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/MachineSetRecommendationMeta"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MachineSetRecommendation"
+            }
+          },
+          "links": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "nullable": true
+            }
+          }
+        }
+      },
+      "MachineSetRecommendationMeta": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "integer",
+            "description": "Total MachineSet groups matching filters"
+          },
+          "limit": {
+            "type": "integer"
+          },
+          "offset": {
+            "type": "integer"
+          }
+        }
+      },
       "NodeUtilizationListResponse": {
         "type": "object",
         "properties": {
@@ -8408,7 +8610,7 @@
           "notifications": {
             "type": "object",
             "additionalProperties": true,
-            "description": "Primary notifications from medium-term cost engine when present."
+            "description": "Notifications aggregated from all recommendation_terms and engines (cost and performance). Duplicate codes appear once; the entry from the shortest term window wins, or the higher severity when ranks differ."
           }
         }
       },
@@ -8590,6 +8792,10 @@
             "type": "string",
             "description": "Most recently observed pod mounting this PVC (display context only; from storage CSV pod column)"
           },
+          "vm_name": {
+            "type": "string",
+            "description": "KubeVirt VM name when the PVC is mounted by a virt-launcher pod (authoritative link from operator storage CSV vm_name column)"
+          },
           "persistentvolume": {
             "type": "string"
           },
@@ -8725,6 +8931,10 @@
           "mounted_by": {
             "type": "string",
             "description": "Most recently observed pod mounting this PVC (from medium term when available)"
+          },
+          "vm_name": {
+            "type": "string",
+            "description": "KubeVirt VM name when the PVC is mounted by a virt-launcher pod (from operator storage CSV)"
           },
           "persistentvolume": {
             "type": "string"
