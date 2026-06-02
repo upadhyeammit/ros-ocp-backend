@@ -4066,6 +4066,14 @@
             }
           },
           {
+            "name": "filter[cluster_resource_quota]",
+            "in": "query",
+            "description": "Alias for `filter[cluster_quota_name]`.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "filter[namespace]",
             "in": "query",
             "description": "Filter to CRQs whose namespace membership includes this namespace (exact match). Alias: `namespace` or `filter[project]`.",
