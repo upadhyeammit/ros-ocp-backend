@@ -3424,6 +3424,50 @@
         }
       }
     },
+    "/recommendations/openshift/notification-codes": {
+      "get": {
+        "tags": [
+          "Reference"
+        ],
+        "summary": "List notification code definitions",
+        "description": "Returns the catalog of notification codes (severity, name, description) used across ROS recommendation plugins. Optional filter[plugin] limits results to codes relevant to container, namespace, node, gpu, pvc, snapshot, vm, quota, or cluster-quota.",
+        "operationId": "getNotificationCodes",
+        "parameters": [
+          {
+            "name": "filter[plugin]",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "container",
+                "namespace",
+                "node",
+                "gpu",
+                "pvc",
+                "snapshot",
+                "vm",
+                "quota",
+                "cluster-quota"
+              ]
+            },
+            "description": "When set, return only codes used by the given recommendation plugin."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Notification code catalog",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationCodesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/recommendations/openshift/fleet-summary": {
       "get": {
         "tags": [
@@ -9000,6 +9044,65 @@
             "type": "number",
             "format": "float",
             "description": "Sum of persisted VM recommendation savings_amount at medium_term for the selected engine (requires ROS_SAVINGS_ESTIMATES_ENABLED and Koku effective_rates at ingestion)."
+          }
+        }
+      },
+      "NotificationCodeDefinition": {
+        "type": "object",
+        "required": [
+          "code",
+          "name",
+          "severity",
+          "description"
+        ],
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Numeric notification code"
+          },
+          "name": {
+            "type": "string",
+            "description": "UPPER_SNAKE_CASE identifier from notification_code_definitions"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "INFO",
+              "WARNING",
+              "CRITICAL"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "description": "Human-readable message shown in API notifications map"
+          }
+        }
+      },
+      "NotificationCodesResponse": {
+        "type": "object",
+        "required": [
+          "meta",
+          "data"
+        ],
+        "properties": {
+          "meta": {
+            "type": "object",
+            "required": [
+              "count"
+            ],
+            "properties": {
+              "count": {
+                "type": "integer",
+                "description": "Number of entries in data"
+              }
+            }
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NotificationCodeDefinition"
+            }
           }
         }
       },
