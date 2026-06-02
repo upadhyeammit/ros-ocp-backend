@@ -4178,7 +4178,7 @@
         ],
         "responses": {
           "200": {
-            "description": "List of cluster-quota recommendations",
+            "description": "List of cluster-quota recommendations. Object-count resources (e.g. count/deployments.apps) affect risk_level and blocking notifications (code 72) only; they are excluded from utilization fields and order_by=utilization sorting.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4228,7 +4228,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Cluster-quota recommendation detail",
+            "description": "Cluster-quota recommendation detail. Object-count resources (e.g. count/deployments.apps) affect risk_level and blocking notifications (code 72) only; they are excluded from utilization fields.",
             "content": {
               "application/json": {
                 "schema": {
@@ -9917,6 +9917,7 @@
       },
       "ClusterQuotaUtilizationPercents": {
         "type": "object",
+        "description": "Utilization percentages for CPU, memory, storage, and pod count quota dimensions only. Object-count resources (e.g. count/deployments.apps) are excluded from these fields and from order_by=utilization sorting; they still contribute to risk_level and blocking notifications (code 72).",
         "properties": {
           "cpu_request_percent": {
             "type": "integer"
@@ -10076,6 +10077,7 @@
       },
       "ClusterQuotaRecommendationDetailResponse": {
         "type": "object",
+        "description": "ClusterResourceQuota recommendation detail. Object-count resources (e.g. count/deployments.apps) affect risk_level and blocking notifications (code 72) only; they are not exposed in utilization fields.",
         "properties": {
           "cluster_uuid": {
             "type": "string",
@@ -10132,6 +10134,7 @@
       },
       "ClusterQuotaRecommendationListResponse": {
         "type": "object",
+        "description": "Paginated cluster-quota recommendation list. Object-count resources (e.g. count/deployments.apps) contribute to risk_level and blocking notifications (code 72) only; they are not included in utilization response fields and do not affect order_by=utilization sorting.",
         "properties": {
           "meta": {
             "type": "object",
