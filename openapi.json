@@ -345,7 +345,7 @@
           {
             "name": "stale",
             "in": "query",
-            "description": "Filter by staleness state. A recommendation is 'stale' when no new usage data has been received within the staleness threshold (default 72 hours). Values: 'false' (default, exclude stale), 'true' (include all), 'only' (show only stale recommendations).",
+            "description": "Filter by staleness state. A recommendation is 'stale' when the cluster has not reported within the staleness threshold (default 48 hours; env ROS_STALENESS_THRESHOLD_HOURS or ROS_STALE_DATA_THRESHOLD_HOURS). Values: 'false' (default, exclude stale), 'true' (include all), 'only' (show only stale recommendations).",
             "required": false,
             "schema": {
               "type": "string",
@@ -5114,6 +5114,21 @@
               "type": "string"
             },
             "example": "environment:production"
+          },
+          {
+            "name": "stale",
+            "in": "query",
+            "description": "Filter by staleness state (namespace recommendations). Stale when the cluster has not reported within ROS_STALENESS_THRESHOLD_HOURS (default 48). Values: 'false' (default, exclude stale), 'true' (include all), 'only' (only stale).",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false",
+                "only"
+              ],
+              "default": "false"
+            }
           }
         ],
         "responses": {
@@ -5198,6 +5213,21 @@
               "type": "string"
             },
             "example": "environment:production"
+          },
+          {
+            "name": "stale",
+            "in": "query",
+            "description": "Filter by staleness state (namespace recommendations). Stale when the cluster has not reported within ROS_STALENESS_THRESHOLD_HOURS (default 48). Values: 'false' (default, exclude stale), 'true' (include all), 'only' (only stale).",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false",
+                "only"
+              ],
+              "default": "false"
+            }
           }
         ],
         "responses": {
@@ -9183,16 +9213,35 @@
             "type": "string",
             "format": "date-time"
           },
+          "resource": {
+            "type": "string",
+            "description": "Resource dimension (cpu_request, memory_request, storage_request, pods)"
+          },
           "recommendation_type": {
             "type": "string"
           },
           "risk_level": {
             "type": "string"
           },
-          "max_utilization_percent": {
-            "type": "number",
-            "format": "double",
+          "recommended_hard": {
+            "type": "integer",
+            "format": "int64",
             "nullable": true
+          },
+          "current_hard": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "current_used": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "utilization_percent": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Utilization percentage for this resource at recorded_at"
           }
         }
       },
