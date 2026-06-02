@@ -4036,7 +4036,7 @@
           "Cluster Quota Recommendations"
         ],
         "summary": "List OpenShift ClusterResourceQuota recommendations",
-        "description": "Returns per-ClusterResourceQuota right-sizing recommendations for the authenticated organization. Compares CRQ hard limits and observed usage against aggregated namespace quota recommendations, then classifies each CRQ as tighten, raise, optimal, or none.",
+        "description": "Returns per-ClusterResourceQuota right-sizing recommendations for the authenticated organization. Compares CRQ hard limits and observed usage against aggregated namespace quota recommendations, then classifies each CRQ as tighten, raise, optimal, or none. Use `group_by[cluster]` for aggregated rows with summed capacity freed and savings.",
         "operationId": "getClusterQuotaRecommendations",
         "x-plugin-required": "cluster-quota",
         "parameters": [
@@ -4107,6 +4107,15 @@
                 "low",
                 "none"
               ]
+            }
+          },
+          {
+            "name": "group_by[cluster]",
+            "in": "query",
+            "description": "Aggregate recommendations by cluster (sum capacity freed and savings across CRQs in each cluster)",
+            "schema": {
+              "type": "boolean",
+              "default": false
             }
           },
           {
@@ -9972,6 +9981,10 @@
               "type": "string"
             },
             "description": "Namespaces matched by the ClusterResourceQuota selector (operator namespaces column)"
+          },
+          "count": {
+            "type": "integer",
+            "description": "Number of CRQ rows in this group (present only when group_by[cluster] is used)"
           }
         }
       },
