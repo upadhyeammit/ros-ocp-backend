@@ -231,6 +231,16 @@
             }
           },
           {
+            "name": "filter[gpu_idle_state]",
+            "in": "query",
+            "description": "Comma-separated GPU idle states to include: active, idle, zombie. Applies to containers with GPU data (`gpu` block). Example: zombie,idle",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "zombie,idle"
+            }
+          },
+          {
             "name": "true-units",
             "in": "query",
             "required": false,
@@ -327,7 +337,7 @@
           {
             "name": "engine",
             "in": "query",
-            "description": "Legacy flat alias for `filter[engine]`. Include only this engine in `recommendation_engines`. When omitted, both cost and performance are returned.",
+            "description": "Legacy flat alias for `filter[engine]`. Cost engine uses lower usage percentiles for rightsizing; performance uses higher percentiles for headroom. When set, the non-selected engine is omitted from `recommendation_engines` on each item. When omitted, both cost and performance are returned.",
             "required": false,
             "schema": {
               "type": "string",
@@ -340,7 +350,7 @@
           {
             "name": "filter[engine]",
             "in": "query",
-            "description": "Include only this engine in `recommendation_engines` under each term. When omitted, both cost and performance are returned.",
+            "description": "Include only this engine in `recommendation_engines` under each term. Cost uses lower percentiles for savings; performance uses higher percentiles for headroom. Omitted engines are not returned in list/detail payloads.",
             "required": false,
             "schema": {
               "type": "string",
@@ -353,7 +363,7 @@
           {
             "name": "order_by",
             "in": "query",
-            "description": "Field to order results by. Options: cluster, project, workload_type, workload, container, last_reported, cpu_request_current, memory_request_current, and per-term variation fields (e.g. cpu_variation_short_cost, memory_variation_long_performance). Variation values are percent of current CPU or memory request (float); see the recommendations.variation amounts in each list item.",
+            "description": "Field to order results by. Options: cluster, project, workload_type, workload, container, last_reported, cpu_request_current, memory_request_current, idle_state, idle_duration_days, estimated_monthly_waste, and per-term variation fields (e.g. cpu_variation_short_cost, memory_variation_long_performance). Variation values are percent of current CPU or memory request (float); see the recommendations.variation amounts in each list item.",
             "required": false,
             "schema": {
               "type": "string",
@@ -366,6 +376,9 @@
                 "last_reported",
                 "cpu_request_current",
                 "memory_request_current",
+                "idle_state",
+                "idle_duration_days",
+                "estimated_monthly_waste",
                 "cpu_variation_short_cost",
                 "cpu_variation_short_performance",
                 "cpu_variation_medium_cost",
@@ -813,6 +826,42 @@
             "required": false,
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "engine",
+            "in": "query",
+            "description": "Legacy flat alias for `filter[engine]`. Cost engine uses lower usage percentiles for rightsizing; performance uses higher percentiles for headroom. When set, the non-selected engine is omitted from `recommendation_engines` on each item. When omitted, both cost and performance are returned.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "cost",
+                "performance"
+              ]
+            }
+          },
+          {
+            "name": "filter[engine]",
+            "in": "query",
+            "description": "Include only this engine in `recommendation_engines` under each term. Cost uses lower percentiles for savings; performance uses higher percentiles for headroom. Omitted engines are not returned in list/detail payloads.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "cost",
+                "performance"
+              ]
+            }
+          },
+          {
+            "name": "filter[idle_state]",
+            "in": "query",
+            "description": "Comma-separated namespace idle states to include: active, idle, zombie. A namespace is idle when all containers and GPUs in it are non-active.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "idle"
             }
           },
           {
@@ -1790,6 +1839,19 @@
             }
           },
           {
+            "name": "filter[engine]",
+            "in": "query",
+            "description": "Filter history rows by recommendation engine (`cost` or `performance`). Legacy flat `?engine=` is also accepted.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "cost",
+                "performance"
+              ]
+            }
+          },
+          {
             "name": "limit",
             "in": "query",
             "description": "Pagination limit",
@@ -2340,6 +2402,16 @@
                 "asc",
                 "desc"
               ]
+            }
+          },
+          {
+            "name": "filter[gpu_idle_state]",
+            "in": "query",
+            "description": "Comma-separated GPU idle states to include: active, idle, zombie.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "idle,zombie"
             }
           },
           {
@@ -3009,7 +3081,7 @@
                 "performance"
               ]
             },
-            "description": "Legacy flat alias for filter[engine]. Include only this engine in `recommendation_engines`. When omitted, both cost and performance are returned."
+            "description": "Legacy flat alias for `filter[engine]`. Cost engine uses lower usage percentiles for rightsizing; performance uses higher percentiles for headroom. When set, the non-selected engine is omitted from `recommendation_engines` on each item. When omitted, both cost and performance are returned."
           },
           {
             "name": "filter[engine]",
@@ -3021,7 +3093,7 @@
                 "performance"
               ]
             },
-            "description": "Include only this engine in `recommendation_engines`. When omitted, both cost and performance are returned."
+            "description": "Include only this engine in `recommendation_engines` under each term. Cost uses lower percentiles for savings; performance uses higher percentiles for headroom. Omitted engines are not returned in list/detail payloads."
           },
           {
             "name": "is_underutilized",
@@ -3261,7 +3333,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "Exact match or wildcard (`*` → SQL LIKE). Nodes without MachineSet labels are excluded from this API."
+            "description": "Exact match or wildcard (`*` \u2192 SQL LIKE). Nodes without MachineSet labels are excluded from this API."
           }
         ],
         "responses": {
@@ -4844,7 +4916,7 @@
                     },
                     "inventory_fresh_hours": {
                       "type": "integer",
-                      "description": "Hours within which snapshot inventory is considered fresh for classification (1–168)",
+                      "description": "Hours within which snapshot inventory is considered fresh for classification (1\u2013168)",
                       "minimum": 1,
                       "maximum": 168,
                       "default": 6
@@ -4904,7 +4976,7 @@
                   },
                   "inventory_fresh_hours": {
                     "type": "integer",
-                    "description": "Hours within which snapshot inventory is considered fresh for classification (1–168)",
+                    "description": "Hours within which snapshot inventory is considered fresh for classification (1\u2013168)",
                     "minimum": 1,
                     "maximum": 168,
                     "default": 6
@@ -4939,7 +5011,7 @@
                     },
                     "inventory_fresh_hours": {
                       "type": "integer",
-                      "description": "Hours within which snapshot inventory is considered fresh for classification (1–168)",
+                      "description": "Hours within which snapshot inventory is considered fresh for classification (1\u2013168)",
                       "minimum": 1,
                       "maximum": 168,
                       "default": 6
@@ -5508,6 +5580,32 @@
             "example": "environment:production"
           },
           {
+            "name": "engine",
+            "in": "query",
+            "description": "Legacy flat alias for `filter[engine]`. Cost engine uses lower usage percentiles for rightsizing; performance uses higher percentiles for headroom. When set, the non-selected engine is omitted from `recommendation_engines` on each item. When omitted, both cost and performance are returned.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "cost",
+                "performance"
+              ]
+            }
+          },
+          {
+            "name": "filter[engine]",
+            "in": "query",
+            "description": "Include only this engine in `recommendation_engines` under each term. Cost uses lower percentiles for savings; performance uses higher percentiles for headroom. Omitted engines are not returned in list/detail payloads.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "cost",
+                "performance"
+              ]
+            }
+          },
+          {
             "name": "stale",
             "in": "query",
             "description": "Filter by staleness state (namespace recommendations). Stale when the cluster has not reported within ROS_STALENESS_THRESHOLD_HOURS (default 48). Values: 'false' (default, exclude stale), 'true' (include all), 'only' (only stale).",
@@ -5605,6 +5703,32 @@
               "type": "string"
             },
             "example": "environment:production"
+          },
+          {
+            "name": "engine",
+            "in": "query",
+            "description": "Legacy flat alias for `filter[engine]`. Cost engine uses lower usage percentiles for rightsizing; performance uses higher percentiles for headroom. When set, the non-selected engine is omitted from `recommendation_engines` on each item. When omitted, both cost and performance are returned.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "cost",
+                "performance"
+              ]
+            }
+          },
+          {
+            "name": "filter[engine]",
+            "in": "query",
+            "description": "Include only this engine in `recommendation_engines` under each term. Cost uses lower percentiles for savings; performance uses higher percentiles for headroom. Omitted engines are not returned in list/detail payloads.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "cost",
+                "performance"
+              ]
+            }
           },
           {
             "name": "stale",
@@ -7185,6 +7309,15 @@
             "format": "date-time",
             "example": "2023-04-18T15:48:54.000Z"
           },
+          "idle_state": {
+            "type": "string",
+            "enum": [
+              "active",
+              "idle",
+              "zombie"
+            ],
+            "description": "Namespace-level idle classification when all workloads in the namespace are idle or zombie."
+          },
           "cpu_request_current": {
             "type": "number",
             "format": "float",
@@ -8410,6 +8543,32 @@
           "estimated_monthly_timeslicing_savings": {
             "$ref": "#/components/schemas/SavingsObject",
             "nullable": true
+          },
+          "gpu_idle_state": {
+            "type": "string",
+            "enum": [
+              "active",
+              "idle",
+              "zombie"
+            ],
+            "description": "GPU utilization idle classification (migration 000084). Omitted when active."
+          },
+          "gpu_idle_since": {
+            "type": "string",
+            "format": "date",
+            "nullable": true,
+            "description": "First date the GPU entered idle or zombie state (YYYY-MM-DD)."
+          },
+          "gpu_idle_duration_days": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Days since gpu_idle_since at last classification run."
+          },
+          "gpu_estimated_waste_cents": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true,
+            "description": "Estimated monthly GPU waste in cents when gpu_idle_state is idle or zombie."
           }
         }
       },
@@ -8584,7 +8743,7 @@
         "properties": {
           "count": {
             "type": "integer",
-            "description": "For `timeslicing`, the number of distinct node×GPU-model groups with recent GPU telemetry in `gpu_container_digests` (potential time-slicing candidates), not the count of actionable time-slicing recommendations. The `/gpu/timeslicing` list may return fewer rows because the engine rejects groups that are well-utilized, memory-bound, MIG-preferred, or below replica thresholds. For `mig`, the count of containers with a non-`full_gpu` MIG profile recommendation."
+            "description": "For `timeslicing`, the number of distinct node\u00d7GPU-model groups with recent GPU telemetry in `gpu_container_digests` (potential time-slicing candidates), not the count of actionable time-slicing recommendations. The `/gpu/timeslicing` list may return fewer rows because the engine rejects groups that are well-utilized, memory-bound, MIG-preferred, or below replica thresholds. For `mig`, the count of containers with a non-`full_gpu` MIG profile recommendation."
           },
           "link": {
             "type": "string",
@@ -8669,6 +8828,14 @@
           "confidence": {
             "type": "number",
             "format": "float"
+          },
+          "gpu_idle_state": {
+            "type": "string",
+            "enum": [
+              "active",
+              "idle",
+              "zombie"
+            ]
           }
         }
       },
@@ -8710,12 +8877,12 @@
           "avg_cpu_utilization": {
             "type": "number",
             "format": "float",
-            "description": "Average CPU P95 utilization (0.0–1.0) across member nodes."
+            "description": "Average CPU P95 utilization (0.0\u20131.0) across member nodes."
           },
           "avg_memory_utilization": {
             "type": "number",
             "format": "float",
-            "description": "Average memory P95 utilization (0.0–1.0) across member nodes."
+            "description": "Average memory P95 utilization (0.0\u20131.0) across member nodes."
           },
           "nodes": {
             "type": "array",
@@ -9424,6 +9591,17 @@
             "type": "integer",
             "description": "Number of days of data available for this PVC"
           },
+          "idle_since": {
+            "type": "string",
+            "format": "date",
+            "nullable": true,
+            "description": "For orphaned PVCs: first date with zero usage (YYYY-MM-DD)."
+          },
+          "idle_duration_days": {
+            "type": "integer",
+            "nullable": true,
+            "description": "For orphaned PVCs: days since idle_since at last classification run."
+          },
           "resize_note": {
             "type": "string",
             "description": "Operational guidance for acting on the recommendation (e.g., Kubernetes does not support in-place PVC shrinking)"
@@ -9684,7 +9862,7 @@
             "additionalProperties": {
               "$ref": "#/components/schemas/NotificationEntry"
             },
-            "description": "Kruize-compatible notification map (codes 70–72 for quota)"
+            "description": "Kruize-compatible notification map (codes 70\u201372 for quota)"
           },
           "count": {
             "type": "integer",
@@ -9940,6 +10118,7 @@
       },
       "IdleDetectionThresholds": {
         "type": "object",
+        "description": "Tenant-configurable idle/zombie thresholds. Advanced: incorrect zombie_cpu_millicores or zombie_peak_millicores values may cause false zombie classification.",
         "properties": {
           "cpu_utilization_percent": {
             "type": "integer",
@@ -9962,6 +10141,18 @@
           },
           "gpu_dram_active_basis_points": {
             "type": "integer"
+          },
+          "zombie_cpu_millicores": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "P95 CPU below this (millicores) is a zombie candidate when peak is also below zombie_peak_millicores."
+          },
+          "zombie_peak_millicores": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000,
+            "description": "Peak CPU below this (millicores) required for zombie classification with low P95."
           }
         }
       },
@@ -11333,7 +11524,7 @@
       },
       "VMNetworkQoSSettings": {
         "type": "object",
-        "description": "Simplified network QoS hints for network-bound VMs (notifications 65–66). Full NIC-type recommendations are future work.",
+        "description": "Simplified network QoS hints for network-bound VMs (notifications 65\u201366). Full NIC-type recommendations are future work.",
         "properties": {
           "enabled": {
             "type": "boolean",
@@ -11343,7 +11534,7 @@
             "type": "number",
             "minimum": 0,
             "maximum": 1,
-            "description": "Packet drop ratio (0–1) at or above which to suggest SR-IOV (default 0.01)"
+            "description": "Packet drop ratio (0\u20131) at or above which to suggest SR-IOV (default 0.01)"
           },
           "sriov_throughput_bps": {
             "type": "integer",
@@ -11361,7 +11552,7 @@
       },
       "VMStorageTieringSettings": {
         "type": "object",
-        "description": "Simplified storage tier hints from multi-day I/O patterns (notifications 67–69). Full StorageClass-aware tiering is future work.",
+        "description": "Simplified storage tier hints from multi-day I/O patterns (notifications 67\u201369). Full StorageClass-aware tiering is future work.",
         "properties": {
           "enabled": {
             "type": "boolean",
@@ -11403,7 +11594,7 @@
       },
       "VMPlacementSettings": {
         "type": "object",
-        "description": "Cluster placement, correlated workload, and NUMA sizing checks (notifications 60–63)",
+        "description": "Cluster placement, correlated workload, and NUMA sizing checks (notifications 60\u201363)",
         "properties": {
           "enable_placement_checks": {
             "type": "boolean",
