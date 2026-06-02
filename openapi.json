@@ -4694,6 +4694,13 @@
                       "type": "number",
                       "description": "Cost rate per GiB per month for estimation"
                     },
+                    "inventory_fresh_hours": {
+                      "type": "integer",
+                      "description": "Hours within which snapshot inventory is considered fresh for classification (1–168)",
+                      "minimum": 1,
+                      "maximum": 168,
+                      "default": 6
+                    },
                     "locked_fields": {
                       "type": "array",
                       "items": {
@@ -4746,6 +4753,13 @@
                   },
                   "cost_per_gib_month_usd": {
                     "type": "number"
+                  },
+                  "inventory_fresh_hours": {
+                    "type": "integer",
+                    "description": "Hours within which snapshot inventory is considered fresh for classification (1–168)",
+                    "minimum": 1,
+                    "maximum": 168,
+                    "default": 6
                   }
                 }
               }
@@ -4774,6 +4788,13 @@
                     },
                     "cost_per_gib_month_usd": {
                       "type": "number"
+                    },
+                    "inventory_fresh_hours": {
+                      "type": "integer",
+                      "description": "Hours within which snapshot inventory is considered fresh for classification (1–168)",
+                      "minimum": 1,
+                      "maximum": 168,
+                      "default": 6
                     },
                     "locked_fields": {
                       "type": "array",
