@@ -3885,7 +3885,8 @@
               "enum": [
                 "tighten",
                 "raise",
-                "optimal"
+                "optimal",
+                "none"
               ]
             }
           },
@@ -3898,7 +3899,8 @@
               "enum": [
                 "high",
                 "medium",
-                "low"
+                "low",
+                "none"
               ]
             }
           },
@@ -9613,7 +9615,8 @@
             "enum": [
               "tighten",
               "raise",
-              "optimal"
+              "optimal",
+              "none"
             ]
           },
           "risk_level": {
@@ -9621,7 +9624,8 @@
             "enum": [
               "high",
               "medium",
-              "low"
+              "low",
+              "none"
             ]
           },
           "quota_hard": {
