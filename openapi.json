@@ -9873,6 +9873,16 @@
           "memory_limit_bytes": {
             "type": "integer",
             "format": "int64"
+          },
+          "storage_request_bytes": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Storage request quota hard/used/recommended (bytes)"
+          },
+          "pods": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Pod count quota hard/used/recommended"
           }
         }
       },
@@ -9884,6 +9894,14 @@
           },
           "memory_request_percent": {
             "type": "integer"
+          },
+          "storage_request_percent": {
+            "type": "integer",
+            "description": "Storage request utilization percent (0-100)"
+          },
+          "pods_percent": {
+            "type": "integer",
+            "description": "Pod count utilization percent (0-100)"
           }
         }
       },
