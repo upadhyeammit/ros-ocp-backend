@@ -3697,6 +3697,22 @@
             }
           },
           {
+            "name": "filter[quota_name]",
+            "in": "query",
+            "description": "Filter by ResourceQuota object name (exact match). Alias: `filter[resource_quota_name]`.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[resource_quota_name]",
+            "in": "query",
+            "description": "Alias for `filter[quota_name]`.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "filter[recommendation_type]",
             "in": "query",
             "description": "Filter by recommendation type",
@@ -3767,6 +3783,7 @@
               "type": "string",
               "enum": [
                 "namespace",
+                "quota_name",
                 "utilization",
                 "estimated_monthly_savings",
                 "risk_level"
@@ -9071,7 +9088,7 @@
       },
       "QuotaCapacityFreed": {
         "type": "object",
-        "description": "Capacity that could be reclaimed by tightening quota (CPU millicores and memory bytes).",
+        "description": "Capacity that could be reclaimed by tightening quota (CPU, memory, storage request, and pods).",
         "properties": {
           "cpu_millicores": {
             "type": "integer",
@@ -9080,6 +9097,16 @@
           "memory_bytes": {
             "type": "integer",
             "format": "int64"
+          },
+          "storage_request_bytes": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Storage request quota capacity freed on tighten (bytes)"
+          },
+          "pods_freed": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Pod count quota capacity freed on tighten (not monetized)"
           }
         }
       },
