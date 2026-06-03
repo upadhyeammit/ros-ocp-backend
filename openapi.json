@@ -2339,6 +2339,20 @@
             }
           },
           {
+            "name": "format",
+            "in": "query",
+            "description": "Response format. Use `csv` for flattened export (one row per node×GPU-model time-slicing recommendation). JSON is the default. `Accept: text/csv` is also supported.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "json",
+                "csv"
+              ],
+              "default": "json"
+            }
+          },
+          {
             "name": "filter[tag:environment]",
             "in": "query",
             "description": "Filter by OpenShift label tag (requires ROS_TAGS_ENABLED=true). Use filter[tag:<key>]=value1,value2 (OR within key; AND across keys). Legacy ?tag=key:value is also accepted. Tag key present only: filter[tag:<key>]=*",
@@ -2367,6 +2381,13 @@
                 "schema": {
                   "$ref": "#/components/schemas/NodeRecommendationListResponse"
                 }
+              },
+              "text/csv": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                },
+                "description": "Flattened CSV export (one row per node×GPU-model time-slicing recommendation)."
               }
             }
           },
