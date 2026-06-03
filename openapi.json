@@ -3961,26 +3961,57 @@
         "operationId": "getPVCRecommendations",
         "parameters": [
           {
-            "name": "cluster_uuid",
+            "name": "filter[cluster]",
             "in": "query",
-            "description": "Filter by cluster UUID",
+            "description": "Filter by cluster UUID (exact match). Legacy alias: `cluster_uuid` or `cluster`.",
             "schema": {
               "type": "string",
               "format": "uuid"
             }
           },
           {
-            "name": "namespace",
+            "name": "cluster_uuid",
             "in": "query",
-            "description": "Filter by namespace",
+            "description": "Legacy flat alias for filter[cluster].",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "filter[project]",
+            "in": "query",
+            "description": "Filter by namespace (exact match). Legacy alias: `namespace` or `project`.",
             "schema": {
               "type": "string"
             }
           },
           {
+            "name": "namespace",
+            "in": "query",
+            "description": "Legacy flat alias for filter[project].",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[recommendation_type]",
+            "in": "query",
+            "description": "Filter by classification. Legacy alias: `recommendation_type`.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "oversized",
+                "near_full",
+                "orphaned",
+                "healthy"
+              ]
+            }
+          },
+          {
             "name": "recommendation_type",
             "in": "query",
-            "description": "Filter by recommendation type",
+            "description": "Legacy flat alias for filter[recommendation_type].",
             "schema": {
               "type": "string",
               "enum": [
@@ -4081,6 +4112,20 @@
               "type": "string"
             },
             "example": "environment:production"
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "description": "Response format. Use `csv` for flattened export (one row per PVC for the selected term). JSON is the default. `Accept: text/csv` is also supported.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "json",
+                "csv"
+              ],
+              "default": "json"
+            }
           }
         ],
         "responses": {
@@ -4091,6 +4136,13 @@
                 "schema": {
                   "$ref": "#/components/schemas/PVCRecommendationListResponse"
                 }
+              },
+              "text/csv": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                },
+                "description": "Flattened CSV export (one row per PVC for the selected term)."
               }
             }
           },
@@ -4303,6 +4355,20 @@
               ],
               "default": "desc"
             }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "description": "Response format. Use `csv` for flattened export (one row per namespace ResourceQuota recommendation). JSON is the default. `Accept: text/csv` is also supported.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "json",
+                "csv"
+              ],
+              "default": "json"
+            }
           }
         ],
         "responses": {
@@ -4313,6 +4379,13 @@
                 "schema": {
                   "$ref": "#/components/schemas/QuotaRecommendationListResponse"
                 }
+              },
+              "text/csv": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                },
+                "description": "Flattened CSV export (one row per namespace ResourceQuota recommendation)."
               }
             }
           },
@@ -9800,6 +9873,15 @@
           "data_days": {
             "type": "integer",
             "description": "Number of days of data available for this PVC"
+          },
+          "term": {
+            "type": "string",
+            "enum": [
+              "short",
+              "medium",
+              "long"
+            ],
+            "description": "Recommendation term window for this list row (from filter[term] or default medium)"
           },
           "idle_since": {
             "type": "string",
