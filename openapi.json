@@ -3091,14 +3091,33 @@
             "schema": {
               "type": "string",
               "format": "uuid"
-            }
+            },
+            "description": "Legacy flat alias for filter[cluster]."
+          },
+          {
+            "name": "filter[cluster]",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Restrict results to a single cluster UUID."
           },
           {
             "name": "node",
             "in": "query",
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "Legacy flat alias for filter[node] (exact node name match)."
+          },
+          {
+            "name": "filter[node]",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Exact match on Kubernetes node name."
           },
           {
             "name": "term",
@@ -3154,7 +3173,20 @@
                 "true",
                 "false"
               ]
-            }
+            },
+            "description": "Legacy flat alias for filter[is_underutilized]."
+          },
+          {
+            "name": "filter[is_underutilized]",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            },
+            "description": "Include only underutilized (true) or non-underutilized (false) nodes."
           },
           {
             "name": "is_overcommitted",
@@ -3165,7 +3197,20 @@
                 "true",
                 "false"
               ]
-            }
+            },
+            "description": "Legacy flat alias for filter[is_overcommitted]."
+          },
+          {
+            "name": "filter[is_overcommitted]",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            },
+            "description": "Include only overcommitted (true) or non-overcommitted (false) nodes."
           },
           {
             "name": "filter[stranded_resource]",
@@ -3269,6 +3314,20 @@
               "type": "string"
             },
             "example": "environment:production"
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "description": "Response format. Use `csv` for flattened export (one row per node × term × engine). JSON is the default. `Accept: text/csv` is also supported.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "json",
+                "csv"
+              ],
+              "default": "json"
+            }
           }
         ],
         "responses": {
@@ -3279,6 +3338,13 @@
                 "schema": {
                   "$ref": "#/components/schemas/NodeUtilizationListResponse"
                 }
+              },
+              "text/csv": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                },
+                "description": "Flattened CSV export (one row per node × term × engine)."
               }
             }
           },
