@@ -2446,6 +2446,39 @@
             }
           },
           {
+            "name": "filter[cluster]",
+            "in": "query",
+            "description": "Cluster UUID. Returns empty results when the cluster is unknown or not visible to the caller.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "filter[project]",
+            "in": "query",
+            "description": "OpenShift namespace (project). Comma-separated values are OR'd. Alias: filter[namespace].",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "description": "Response format. Use `csv` for flattened export (one row per container-term MIG recommendation). JSON is the default. `Accept: text/csv` is also supported.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "json",
+                "csv"
+              ],
+              "default": "json"
+            }
+          },
+          {
             "name": "filter[gpu_idle_state]",
             "in": "query",
             "description": "Comma-separated GPU idle states to include: active, idle, zombie.",
@@ -2484,6 +2517,13 @@
                 "schema": {
                   "$ref": "#/components/schemas/GPUMIGListResponse"
                 }
+              },
+              "text/csv": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                },
+                "description": "Flattened CSV export (one row per container-term MIG recommendation)."
               }
             }
           },
