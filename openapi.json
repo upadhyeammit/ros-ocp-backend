@@ -6114,21 +6114,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "locked_fields": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      },
-                      "description": "Fields locked by environment variables or ROS_SETTINGS_LOCKED ([\"*\"] when all tenant overrides are frozen)"
-                    },
-                    "settings_locked": {
-                      "type": "boolean",
-                      "description": "True when ROS_SETTINGS_LOCKED prevents tenant threshold overrides for this recommendation_type"
-                    }
-                  },
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/SizingThresholdSettingsResponse"
                 }
               }
             }
@@ -6156,8 +6142,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "additionalProperties": true
+                "$ref": "#/components/schemas/SizingThresholdSettingsUpdate"
               }
             }
           }
@@ -6168,16 +6153,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "locked_fields": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    }
-                  },
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/SizingThresholdSettingsResponse"
                 }
               }
             }
@@ -6244,21 +6220,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "locked_fields": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      },
-                      "description": "Fields locked by environment variables or ROS_SETTINGS_LOCKED ([\"*\"] when all tenant overrides are frozen)"
-                    },
-                    "settings_locked": {
-                      "type": "boolean",
-                      "description": "True when ROS_SETTINGS_LOCKED prevents tenant threshold overrides for this recommendation_type"
-                    }
-                  },
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/SizingThresholdSettingsResponse"
                 }
               }
             }
@@ -6286,8 +6248,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "additionalProperties": true
+                "$ref": "#/components/schemas/SizingThresholdSettingsUpdate"
               }
             }
           }
@@ -6298,16 +6259,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "locked_fields": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    }
-                  },
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/SizingThresholdSettingsResponse"
                 }
               }
             }
@@ -11339,6 +11291,115 @@
             }
           }
         }
+      },
+      "SizingThresholdSettings": {
+        "type": "object",
+        "description": "Container and namespace threshold settings (GET/PUT /settings/container and /settings/namespace). Additional plugin-specific fields may appear; unknown keys are accepted when additionalProperties is true on the enclosing response.",
+        "properties": {
+          "cpu_cost_percentile": {
+            "type": "number",
+            "format": "double",
+            "description": "Cost engine CPU percentile (0.01–1.0). Lower values rightsizing more aggressively."
+          },
+          "cpu_perf_percentile": {
+            "type": "number",
+            "format": "double",
+            "description": "Performance engine CPU percentile (0.01–1.0). Higher values reserve more headroom."
+          },
+          "mem_cost_percentile": {
+            "type": "number",
+            "format": "double",
+            "description": "Cost engine memory percentile (0.01–1.0)."
+          },
+          "mem_perf_percentile": {
+            "type": "number",
+            "format": "double",
+            "description": "Performance engine memory percentile (0.01–1.0)."
+          },
+          "min_margin": {
+            "type": "number",
+            "format": "double"
+          },
+          "max_margin": {
+            "type": "number",
+            "format": "double"
+          },
+          "limit_multiplier": {
+            "type": "number",
+            "format": "double"
+          },
+          "cpu_floor_mc": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "idle_cpu_threshold_mc": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "idle_mem_threshold_kib": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "mem_trend_slope_threshold": {
+            "type": "number",
+            "format": "double"
+          },
+          "low_confidence_threshold": {
+            "type": "number",
+            "format": "float"
+          }
+        },
+        "additionalProperties": true
+      },
+      "SizingThresholdSettingsResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SizingThresholdSettings"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "locked_fields": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Fields locked by environment variables or ROS_SETTINGS_LOCKED ([\"*\"] when all tenant overrides are frozen)"
+              },
+              "settings_locked": {
+                "type": "boolean",
+                "description": "True when ROS_SETTINGS_LOCKED prevents tenant threshold overrides for this recommendation_type"
+              }
+            }
+          }
+        ]
+      },
+      "SizingThresholdSettingsUpdate": {
+        "type": "object",
+        "description": "Partial update body for container/namespace threshold settings.",
+        "properties": {
+          "cpu_cost_percentile": {
+            "type": "number",
+            "format": "double",
+            "description": "Cost engine CPU percentile (0.01–1.0)."
+          },
+          "cpu_perf_percentile": {
+            "type": "number",
+            "format": "double",
+            "description": "Performance engine CPU percentile (0.01–1.0)."
+          },
+          "mem_cost_percentile": {
+            "type": "number",
+            "format": "double",
+            "description": "Cost engine memory percentile (0.01–1.0)."
+          },
+          "mem_perf_percentile": {
+            "type": "number",
+            "format": "double",
+            "description": "Performance engine memory percentile (0.01–1.0)."
+          }
+        },
+        "additionalProperties": true
       },
       "VMThresholdSettings": {
         "type": "object",
