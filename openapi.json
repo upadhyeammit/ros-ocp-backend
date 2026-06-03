@@ -182,16 +182,7 @@
           {
             "name": "filter[project]",
             "in": "query",
-            "description": "Partial match on project (namespace) name. Alias: `project`, `namespace`, or `filter[namespace]`.",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "filter[namespace]",
-            "in": "query",
-            "description": "Partial match on namespace (project) name. Alias for `filter[project]`. Also accepts flat `project` or `namespace`.",
+            "description": "Partial match on project (OpenShift namespace) name. Also accepts flat `project`, `namespace`, or undocumented `filter[namespace]` for backward compatibility.",
             "required": false,
             "schema": {
               "type": "string"
@@ -2531,9 +2522,9 @@
             }
           },
           {
-            "name": "filter[namespace]",
+            "name": "filter[project]",
             "in": "query",
-            "description": "Filter by namespace (exact match). Alias: `namespace` or `filter[project]`.",
+            "description": "Filter by project (OpenShift namespace, exact match). Also accepts flat `namespace` or undocumented `filter[namespace]` for backward compatibility.",
             "schema": {
               "type": "string"
             }
@@ -4434,17 +4425,9 @@
             }
           },
           {
-            "name": "filter[namespace]",
-            "in": "query",
-            "description": "Filter to CRQs whose namespace membership includes this namespace (exact match). Alias: `namespace` or `filter[project]`.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "filter[project]",
             "in": "query",
-            "description": "Alias for `filter[namespace]`.",
+            "description": "Filter to CRQs whose namespace membership includes this project (OpenShift namespace, exact match). Also accepts flat `namespace` or undocumented `filter[namespace]` for backward compatibility.",
             "schema": {
               "type": "string"
             }
