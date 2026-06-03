@@ -2726,6 +2726,26 @@
             }
           },
           {
+            "name": "filter[tag:environment]",
+            "in": "query",
+            "description": "Filter by OpenShift label tag (requires ROS_TAGS_ENABLED=true). Use filter[tag:<key>]=value1,value2 (OR within key; AND across keys). Legacy ?tag=key:value is also accepted. Tag key present only: filter[tag:<key>]=*",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "production"
+          },
+          {
+            "name": "tag",
+            "in": "query",
+            "description": "Legacy tag filter syntax: key:value or key:* (repeatable). Prefer filter[tag:<key>]=value when ROS_TAGS_ENABLED=true.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "environment:production"
+          },
+          {
             "name": "order_by",
             "in": "query",
             "description": "Sort field. Bracket form `order_by[field]` is also accepted.",
@@ -3786,7 +3806,7 @@
           "Fleet Summary"
         ],
         "summary": "Get fleet-level savings summary",
-        "description": "Returns aggregated estimated monthly savings across all clusters for the authenticated organization. Sums persisted savings from container, node, PVC, snapshot, and VM recommendations for the selected term (default `medium`). Container, node, and VM totals honor the optional `engine` query parameter (default `cost`). GPU savings are computed at API read time and are excluded (see `gpu_savings_note`).",
+        "description": "Returns aggregated estimated monthly savings across all clusters for the authenticated organization. Sums persisted savings from container, node, PVC, snapshot, and VM recommendations. Container and node totals honor both the optional `engine` query parameter (default `cost`) and `term` (default `medium`). VM totals honor `engine` and `term` (mapped to `short_term`, `medium_term`, `long_term`). PVC totals honor `term` only (`engine` is ignored). Snapshot totals are term-independent (all snapshot recommendations are included regardless of `term`). GPU savings are computed at API read time and are excluded (see `gpu_savings_note`).",
         "operationId": "getFleetSavingsSummary",
         "parameters": [
           {
@@ -4378,6 +4398,26 @@
               ],
               "default": "json"
             }
+          },
+          {
+            "name": "filter[tag:environment]",
+            "in": "query",
+            "description": "Filter by OpenShift label tag (requires ROS_TAGS_ENABLED=true). Use filter[tag:<key>]=value1,value2 (OR within key; AND across keys). Legacy ?tag=key:value is also accepted. Tag key present only: filter[tag:<key>]=*",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "production"
+          },
+          {
+            "name": "tag",
+            "in": "query",
+            "description": "Legacy tag filter syntax: key:value or key:* (repeatable). Prefer filter[tag:<key>]=value when ROS_TAGS_ENABLED=true.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "environment:production"
           }
         ],
         "responses": {
@@ -4704,6 +4744,26 @@
               ],
               "default": "desc"
             }
+          },
+          {
+            "name": "filter[tag:environment]",
+            "in": "query",
+            "description": "Filter by OpenShift label tag (requires ROS_TAGS_ENABLED=true). Use filter[tag:<key>]=value1,value2 (OR within key; AND across keys). Legacy ?tag=key:value is also accepted. Tag key present only: filter[tag:<key>]=*",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "production"
+          },
+          {
+            "name": "tag",
+            "in": "query",
+            "description": "Legacy tag filter syntax: key:value or key:* (repeatable). Prefer filter[tag:<key>]=value when ROS_TAGS_ENABLED=true.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "environment:production"
           }
         ],
         "responses": {
@@ -7408,6 +7468,11 @@
             "$ref": "#/components/schemas/ResourceConfig",
             "description": "Recommended resource configuration (requests and limits)"
           },
+          "business_hours": {
+            "nullable": true,
+            "description": "Business-hours-weighted sizing for this engine (all_hours sizing is in config). Omitted when no schedule applies or reship is incomplete.",
+            "$ref": "#/components/schemas/BusinessHoursEngineDetail"
+          },
           "variation": {
             "$ref": "#/components/schemas/ResourceConfig",
             "description": "Percentage change from current to recommended. Format is 'percentage' for both CPU and memory."
@@ -7418,6 +7483,24 @@
             "additionalProperties": {
               "$ref": "#/components/schemas/NotificationEntry"
             }
+          }
+        }
+      },
+      "BusinessHoursEngineDetail": {
+        "type": "object",
+        "description": "Nested business_hours block on container and namespace recommendation engines (detail and list when enriched).",
+        "properties": {
+          "requests": {
+            "$ref": "#/components/schemas/ResourcePair",
+            "description": "Business-hours-weighted CPU and memory requests"
+          },
+          "limits": {
+            "$ref": "#/components/schemas/ResourcePair",
+            "description": "Business-hours-weighted CPU and memory limits (may be empty)"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Present when business-hours data is degraded (e.g. reship in progress)"
           }
         }
       },
@@ -9593,7 +9676,7 @@
       },
       "SavingsObject": {
         "type": "object",
-        "description": "Structured monthly savings amount with six-decimal string value and ISO currency units. Savings estimates are approximate projections based on current resource pricing and observed usage patterns. Actual savings may vary due to rate changes, workload fluctuations, and shared infrastructure overhead.",
+        "description": "Structured monthly savings amount with six-decimal string value and ISO currency units. Savings estimates are approximate projections based on current resource pricing and observed usage patterns. Actual savings may vary due to rate changes, workload fluctuations, and shared infrastructure overhead. Negative values are valid and indicate the current resource allocation is already below the recommended target (additional monthly cost to reach the recommendation).",
         "properties": {
           "value": {
             "type": "string",
@@ -9713,7 +9796,7 @@
           "vm": {
             "type": "number",
             "format": "float",
-            "description": "Sum of persisted VM recommendation savings_amount at medium_term for the selected engine (requires ROS_SAVINGS_ESTIMATES_ENABLED and Koku effective_rates at ingestion)."
+            "description": "Sum of persisted VM recommendation savings_amount for the selected `term` (short_term, medium_term, or long_term) and `engine` (requires ROS_SAVINGS_ESTIMATES_ENABLED and Koku effective_rates at ingestion)."
           }
         }
       },
