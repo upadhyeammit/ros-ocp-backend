@@ -3352,7 +3352,7 @@
             "description": "Bad request"
           },
           "403": {
-            "description": "User is not authorized (RBAC)"
+            "description": "User is not authorized (RBAC). Requires `cost-management:openshift.node:read` permission."
           },
           "404": {
             "description": "Plugin disabled \u2014 enable the `node` plugin via ROS_ENABLED_PLUGINS"
@@ -3467,7 +3467,7 @@
             "description": "Bad request"
           },
           "403": {
-            "description": "User is not authorized (RBAC)"
+            "description": "User is not authorized (RBAC). Requires `cost-management:openshift.node:read` permission."
           },
           "503": {
             "description": "Service unavailable"
@@ -3519,7 +3519,7 @@
             "description": "Bad request"
           },
           "403": {
-            "description": "User is not authorized (RBAC)"
+            "description": "User is not authorized (RBAC). Requires `cost-management:openshift.node:read` permission."
           },
           "404": {
             "description": "Node not found or node plugin disabled"
@@ -3676,7 +3676,7 @@
             "description": "Bad request"
           },
           "403": {
-            "description": "User is not authorized (RBAC)"
+            "description": "User is not authorized (RBAC). Requires `cost-management:openshift.node:read` permission."
           },
           "503": {
             "description": "Service unavailable"
@@ -3690,7 +3690,7 @@
           "Fleet Summary"
         ],
         "summary": "Get fleet-level savings summary",
-        "description": "Returns aggregated estimated monthly savings across all clusters for the authenticated organization. Sums persisted savings from container, node, PVC, snapshot, and VM recommendations at medium term. Container, node, and VM totals honor the optional `engine` query parameter (default `cost`). GPU savings are computed at API read time and are excluded (see `gpu_savings_note`).",
+        "description": "Returns aggregated estimated monthly savings across all clusters for the authenticated organization. Sums persisted savings from container, node, PVC, snapshot, and VM recommendations for the selected term (default `medium`). Container, node, and VM totals honor the optional `engine` query parameter (default `cost`). GPU savings are computed at API read time and are excluded (see `gpu_savings_note`).",
         "operationId": "getFleetSavingsSummary",
         "parameters": [
           {
@@ -3705,6 +3705,30 @@
               "default": "cost"
             },
             "description": "Recommendation engine profile for container, node, and VM savings aggregation. Defaults to `cost` for backwards compatibility."
+          },
+          {
+            "name": "term",
+            "in": "query",
+            "description": "Recommendation term horizon. Filters savings to the specified term (`short`, `medium`, or `long`). VM rows use mapped term keys (`short_term`, `medium_term`, `long_term`).",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "short",
+                "medium",
+                "long"
+              ],
+              "default": "medium"
+            }
+          },
+          {
+            "name": "filter[cluster]",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Cluster UUID. Scopes `group_by[tag:key]` and `group_by[idle_state]` responses to a single cluster. Aliases: `cluster`, `cluster_uuid`."
           },
           {
             "name": "group_by[tag:environment]",
@@ -3747,7 +3771,7 @@
             }
           },
           "400": {
-            "description": "Invalid engine parameter"
+            "description": "Invalid engine or term parameter"
           },
           "403": {
             "description": "User is not authorized (RBAC)"
@@ -9378,7 +9402,7 @@
       },
       "SavingsObject": {
         "type": "object",
-        "description": "Structured monthly savings amount with six-decimal string value and ISO currency units.",
+        "description": "Structured monthly savings amount with six-decimal string value and ISO currency units. Savings estimates are approximate projections based on current resource pricing and observed usage patterns. Actual savings may vary due to rate changes, workload fluctuations, and shared infrastructure overhead.",
         "properties": {
           "value": {
             "type": "string",
@@ -9398,7 +9422,7 @@
       },
       "FleetSavingsSummaryResponse": {
         "type": "object",
-        "description": "Aggregated estimated monthly savings across all clusters for the organization.",
+        "description": "Aggregated estimated monthly savings across all clusters for the organization. Savings estimates are approximate projections based on current resource pricing and observed usage patterns. Actual savings may vary due to rate changes, workload fluctuations, and shared infrastructure overhead. GPU savings are excluded (by_plugin.gpu is always 0); query container or node detail endpoints for GPU dollar estimates.",
         "properties": {
           "currency": {
             "type": "string",
