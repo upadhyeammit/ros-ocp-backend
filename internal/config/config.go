@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"log"
+	"os"
 	"strings"
 	"sync"
 
@@ -113,9 +114,9 @@ type Config struct {
 	// this threshold are marked stale. Defaults to 48 (2 days).
 	StalenessThresholdHours int `mapstructure:"ROS_STALENESS_THRESHOLD_HOURS"`
 
-	// Stale archive days. Stale recommendations older than this are deleted
+	// Stale cleanup days. Stale recommendations older than this are deleted
 	// during the retention sweep. Defaults to 30.
-	StaleArchiveDays int `mapstructure:"ROS_STALE_ARCHIVE_DAYS"`
+	StaleCleanupDays int `mapstructure:"ROS_STALE_CLEANUP_DAYS"`
 
 	// Koku masu API URL for fetching cost data (savings estimates)
 	KokuMasuURL string `mapstructure:"KOKU_MASU_URL"`
@@ -381,8 +382,20 @@ var (
 	cfg   *Config
 )
 
+// migrateLegacyStaleCleanupDaysEnv maps the deprecated ROS_STALE_ARCHIVE_DAYS env var
+// to ROS_STALE_CLEANUP_DAYS when only the legacy name is set.
+func migrateLegacyStaleCleanupDaysEnv() {
+	if os.Getenv("ROS_STALE_CLEANUP_DAYS") != "" {
+		return
+	}
+	if legacy := os.Getenv("ROS_STALE_ARCHIVE_DAYS"); legacy != "" {
+		_ = os.Setenv("ROS_STALE_CLEANUP_DAYS", legacy)
+	}
+}
+
 func initConfig() {
 	_ = godotenv.Load() // loads .env into process environment if present; no-op otherwise
+	migrateLegacyStaleCleanupDaysEnv()
 	viper.AutomaticEnv()
 	if clowder.IsClowderEnabled() {
 		viper.SetDefault("LogFormater", "json")
@@ -520,7 +533,7 @@ func initConfig() {
 	viper.SetDefault("ROS_RETENTION_MONTHS", 6)
 	viper.SetDefault("ROS_HISTORY_RETENTION_DAYS", 90)
 	viper.SetDefault("ROS_STALENESS_THRESHOLD_HOURS", 48)
-	viper.SetDefault("ROS_STALE_ARCHIVE_DAYS", 30)
+	viper.SetDefault("ROS_STALE_CLEANUP_DAYS", 30)
 	viper.SetDefault("ROS_MAX_LOOKBACK_DAYS", 90)
 	viper.SetDefault("MAXIMUM_COUNT_PER_QUERY_PARAM", 5)
 	viper.SetDefault("GLOBAL_HTTP_CLIENT_TIMEOUT_SECS", 30)
@@ -750,6 +763,8 @@ func initConfig() {
 	_ = viper.BindEnv("CSVDownloadTimeoutSecs", "ROS_CSV_DOWNLOAD_TIMEOUT_SECS", "ROS_CSV_DOWNLOAD_TIMEOUT_SECONDS")
 	// Requirements spec name; ROS_STALENESS_THRESHOLD_HOURS remains the primary env var.
 	_ = viper.BindEnv("ROS_STALENESS_THRESHOLD_HOURS", "ROS_STALENESS_THRESHOLD_HOURS", "ROS_STALE_DATA_THRESHOLD_HOURS")
+	// Deprecated: ROS_STALE_ARCHIVE_DAYS renamed to ROS_STALE_CLEANUP_DAYS (behavior is delete, not archive).
+	_ = viper.BindEnv("ROS_STALE_CLEANUP_DAYS", "ROS_STALE_CLEANUP_DAYS", "ROS_STALE_ARCHIVE_DAYS")
 
 	if err := viper.Unmarshal(&cfg); err != nil {
 		log.Fatalf("config: cannot unmarshal configuration: %v", err)
@@ -773,9 +788,9 @@ func validateLoadedConfig(c *Config) {
 		log.Printf("config: ROS_STALENESS_THRESHOLD_HOURS (%d) is invalid; using 48", c.StalenessThresholdHours)
 		c.StalenessThresholdHours = 48
 	}
-	if c.StaleArchiveDays <= 0 {
-		log.Printf("config: ROS_STALE_ARCHIVE_DAYS (%d) is invalid; using 30", c.StaleArchiveDays)
-		c.StaleArchiveDays = 30
+	if c.StaleCleanupDays <= 0 {
+		log.Printf("config: ROS_STALE_CLEANUP_DAYS (%d) is invalid; using 30", c.StaleCleanupDays)
+		c.StaleCleanupDays = 30
 	}
 	if c.DBMaxConns <= 0 {
 		log.Printf("config: ROS_DB_MAX_CONNS (%d) is invalid; using 10", c.DBMaxConns)

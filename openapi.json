@@ -8564,6 +8564,11 @@
           "recommendation_age_hours": {
             "type": "integer",
             "nullable": true
+          },
+          "engine": {
+            "type": "string",
+            "enum": ["cost", "performance"],
+            "description": "Recommendation engine that produced this quality measurement."
           }
         }
       },
