@@ -2682,7 +2682,9 @@
                 "is_abandoned",
                 "is_oversized",
                 "confidence",
-                "last_recommended_at"
+                "last_recommended_at",
+                "savings",
+                "savings_amount"
               ],
               "default": "vm_name"
             }
@@ -2720,6 +2722,20 @@
               "default": 0,
               "minimum": 0
             }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "description": "Response format. Use `csv` for flattened export (one row per VM recommendation). JSON is the default. `Accept: text/csv` is also supported.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "json",
+                "csv"
+              ],
+              "default": "json"
+            }
           }
         ],
         "responses": {
@@ -2730,6 +2746,13 @@
                 "schema": {
                   "$ref": "#/components/schemas/VMRecommendationListResponse"
                 }
+              },
+              "text/csv": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                },
+                "description": "Flattened CSV export (one row per VM recommendation)."
               }
             }
           },
@@ -2954,6 +2977,20 @@
               "default": 0,
               "minimum": 0
             }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "description": "Response format. Use `csv` for flattened export (one row per history snapshot). JSON is the default. `Accept: text/csv` is also supported.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "json",
+                "csv"
+              ],
+              "default": "json"
+            }
           }
         ],
         "responses": {
@@ -2964,6 +3001,13 @@
                 "schema": {
                   "$ref": "#/components/schemas/VMRecommendationHistoryResponse"
                 }
+              },
+              "text/csv": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                },
+                "description": "Flattened CSV export (one row per history snapshot)."
               }
             }
           },
