@@ -3824,7 +3824,16 @@
               "type": "string",
               "format": "uuid"
             },
-            "description": "Cluster UUID. Scopes `group_by[tag:key]` and `group_by[idle_state]` responses to a single cluster. Aliases: `cluster`, `cluster_uuid`."
+            "description": "Cluster UUID. Scopes `group_by[tag:key]` and `group_by[idle_state]` responses to a single cluster. Ignored on the default (ungrouped) response. Aliases: `cluster`, `cluster_uuid`."
+          },
+          {
+            "name": "filter[project]",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "OpenShift namespace (project). Scopes `group_by[tag:key]` container savings to a single namespace. Only applies when `group_by[tag:*]` is present; ignored otherwise. Aliases: `filter[namespace]`, `namespace`."
           },
           {
             "name": "group_by[tag:environment]",
@@ -4910,6 +4919,22 @@
             "description": "Filter by namespace (exact match or wildcard with *)",
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "filter[recommendation_type]",
+            "in": "query",
+            "description": "Filter by recommendation type (same values as list endpoint)",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "orphaned",
+                "never_restored",
+                "redundant",
+                "stale",
+                "managed",
+                "active"
+              ]
             }
           },
           {
