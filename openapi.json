@@ -4118,11 +4118,19 @@
           {
             "name": "offset",
             "in": "query",
-            "description": "Number of results to skip",
+            "description": "Number of results to skip (ignored when `after` is set)",
             "schema": {
               "type": "integer",
               "default": 0,
               "minimum": 0
+            }
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "description": "Opaque base64url cursor from a previous response's `meta.next_cursor`. When set, the server uses keyset pagination and **ignores `offset`**. See [API pagination](docs-site/pagination.md).",
+            "schema": {
+              "type": "string"
             }
           },
           {
@@ -9985,6 +9993,13 @@
             "type": "integer",
             "description": "Number of days of data available for this PVC"
           },
+          "confidence_level": {
+            "type": "number",
+            "format": "float",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Confidence in the recommendation (1.0 when data_days >= term MinDataDays; proportional below threshold). Notification code 1 when below LowConfidenceThreshold."
+          },
           "term": {
             "type": "string",
             "enum": [
@@ -10032,7 +10047,15 @@
               },
               "offset": {
                 "type": "integer",
-                "description": "Number of results skipped"
+                "description": "Number of results skipped (0 when keyset mode via `after`)"
+              },
+              "has_next": {
+                "type": "boolean",
+                "description": "True when another page exists after this one"
+              },
+              "next_cursor": {
+                "type": "string",
+                "description": "Opaque cursor to pass as `after` on the next request when `has_next` is true"
               },
               "currency": {
                 "type": "string",
