@@ -1470,7 +1470,7 @@
           "Business Hours Settings"
         ],
         "summary": "Get effective business hours schedule",
-        "description": "Resolves the inheritance chain (namespace → cluster → org) for optional cluster_id and namespace query parameters and returns the effective schedule with resolved_from metadata.",
+        "description": "Resolves the inheritance chain (namespace \u2192 cluster \u2192 org) for optional cluster_id and namespace query parameters and returns the effective schedule with resolved_from metadata.",
         "operationId": "getBusinessHoursEffective",
         "x-plugin-required": "business-hours",
         "parameters": [
@@ -2341,7 +2341,7 @@
           {
             "name": "format",
             "in": "query",
-            "description": "Response format. Use `csv` for flattened export (one row per node×GPU-model time-slicing recommendation). JSON is the default. `Accept: text/csv` is also supported.",
+            "description": "Response format. Use `csv` for flattened export (one row per node\u00d7GPU-model time-slicing recommendation). JSON is the default. `Accept: text/csv` is also supported.",
             "required": false,
             "schema": {
               "type": "string",
@@ -2387,7 +2387,7 @@
                   "type": "string",
                   "format": "binary"
                 },
-                "description": "Flattened CSV export (one row per node×GPU-model time-slicing recommendation)."
+                "description": "Flattened CSV export (one row per node\u00d7GPU-model time-slicing recommendation)."
               }
             }
           },
@@ -3442,7 +3442,7 @@
           {
             "name": "format",
             "in": "query",
-            "description": "Response format. Use `csv` for flattened export (one row per node × term × engine). JSON is the default. `Accept: text/csv` is also supported.",
+            "description": "Response format. Use `csv` for flattened export (one row per node \u00d7 term \u00d7 engine). JSON is the default. `Accept: text/csv` is also supported.",
             "required": false,
             "schema": {
               "type": "string",
@@ -3468,7 +3468,7 @@
                   "type": "string",
                   "format": "binary"
                 },
-                "description": "Flattened CSV export (one row per node × term × engine)."
+                "description": "Flattened CSV export (one row per node \u00d7 term \u00d7 engine)."
               }
             }
           },
@@ -7301,7 +7301,7 @@
             "description": "Peak memory usage (bytes) over observation window."
           },
           "estimated_monthly_waste": {
-            "$ref": "#/components/schemas/SavingsObject",
+            "$ref": "#/components/schemas/MoneyAmount",
             "nullable": true,
             "description": "Full terminate opportunity when idle_state is idle or zombie."
           },
@@ -7358,7 +7358,7 @@
             "$ref": "#/components/schemas/ReplicaInfo"
           },
           "estimated_monthly_savings": {
-            "$ref": "#/components/schemas/SavingsObject",
+            "$ref": "#/components/schemas/MoneyAmount",
             "nullable": true,
             "description": "Estimated total monthly savings across all resource types (CPU, memory)"
           },
@@ -8812,7 +8812,7 @@
             "nullable": true
           },
           "estimated_monthly_savings": {
-            "$ref": "#/components/schemas/SavingsObject",
+            "$ref": "#/components/schemas/MoneyAmount",
             "nullable": true
           }
         }
@@ -8900,7 +8900,10 @@
           },
           "engine": {
             "type": "string",
-            "enum": ["cost", "performance"],
+            "enum": [
+              "cost",
+              "performance"
+            ],
             "description": "Recommendation engine that produced this quality measurement."
           }
         }
@@ -8992,11 +8995,11 @@
             "example": 4
           },
           "estimated_monthly_gpu_savings": {
-            "$ref": "#/components/schemas/SavingsObject",
+            "$ref": "#/components/schemas/MoneyAmount",
             "nullable": true
           },
           "estimated_monthly_timeslicing_savings": {
-            "$ref": "#/components/schemas/SavingsObject",
+            "$ref": "#/components/schemas/MoneyAmount",
             "nullable": true
           },
           "gpu_idle_state": {
@@ -9019,11 +9022,10 @@
             "nullable": true,
             "description": "Days since gpu_idle_since at last classification run."
           },
-          "gpu_estimated_waste_cents": {
-            "type": "integer",
-            "format": "int64",
+          "estimated_monthly_gpu_waste": {
+            "$ref": "#/components/schemas/MoneyAmount",
             "nullable": true,
-            "description": "Estimated monthly GPU waste in cents when gpu_idle_state is idle or zombie."
+            "description": "Estimated monthly GPU waste when gpu_idle_state is idle or zombie."
           }
         }
       },
@@ -9072,7 +9074,7 @@
             "example": "USD"
           },
           "total_savings": {
-            "$ref": "#/components/schemas/SavingsObject",
+            "$ref": "#/components/schemas/MoneyAmount",
             "nullable": true,
             "description": "Sum of total_node_savings across the current page"
           },
@@ -9125,11 +9127,11 @@
             "maximum": 8
           },
           "savings_per_gpu": {
-            "$ref": "#/components/schemas/SavingsObject",
+            "$ref": "#/components/schemas/MoneyAmount",
             "nullable": true
           },
           "total_node_savings": {
-            "$ref": "#/components/schemas/SavingsObject",
+            "$ref": "#/components/schemas/MoneyAmount",
             "nullable": true
           },
           "confidence": {
@@ -9345,7 +9347,7 @@
             "description": "Sum of node_count_reduction across nodes in the group."
           },
           "total_monthly_savings": {
-            "$ref": "#/components/schemas/SavingsObject",
+            "$ref": "#/components/schemas/MoneyAmount",
             "description": "Sum of estimated monthly savings for member nodes."
           },
           "avg_cpu_utilization": {
@@ -9608,7 +9610,7 @@
             "format": "date-time"
           },
           "estimated_monthly_savings": {
-            "$ref": "#/components/schemas/SavingsObject",
+            "$ref": "#/components/schemas/MoneyAmount",
             "nullable": true
           }
         }
@@ -9780,7 +9782,7 @@
           }
         }
       },
-      "SavingsObject": {
+      "MoneyAmount": {
         "type": "object",
         "description": "Structured monthly savings amount with two-decimal string value and ISO currency units. Savings estimates are approximate projections based on current resource pricing and observed usage patterns. Actual savings may vary due to rate changes, workload fluctuations, and shared infrastructure overhead. Negative values are valid and indicate the current resource allocation is already below the recommended target (additional monthly cost to reach the recommendation).",
         "properties": {
@@ -9809,7 +9811,7 @@
             "example": "USD"
           },
           "estimated_monthly_savings": {
-            "$ref": "#/components/schemas/SavingsObject"
+            "$ref": "#/components/schemas/MoneyAmount"
           },
           "by_cluster": {
             "type": "array",
@@ -9835,7 +9837,7 @@
             "type": "string"
           },
           "estimated_monthly_savings": {
-            "$ref": "#/components/schemas/SavingsObject"
+            "$ref": "#/components/schemas/MoneyAmount"
           },
           "has_cost_data": {
             "type": "boolean"
@@ -9872,7 +9874,7 @@
             "description": "Tag value from org_container_keys.resolved_tags; null when the key is absent"
           },
           "estimated_monthly_savings": {
-            "$ref": "#/components/schemas/SavingsObject"
+            "$ref": "#/components/schemas/MoneyAmount"
           }
         }
       },
@@ -9995,7 +9997,7 @@
             "example": "USD"
           },
           "total_monthly_savings": {
-            "$ref": "#/components/schemas/SavingsObject"
+            "$ref": "#/components/schemas/MoneyAmount"
           }
         }
       },
@@ -10120,7 +10122,7 @@
             "description": "Operational guidance for acting on the recommendation (e.g., Kubernetes does not support in-place PVC shrinking)"
           },
           "estimated_monthly_savings": {
-            "$ref": "#/components/schemas/SavingsObject",
+            "$ref": "#/components/schemas/MoneyAmount",
             "nullable": true
           }
         }
@@ -10369,7 +10371,7 @@
             "$ref": "#/components/schemas/QuotaCapacityFreed"
           },
           "estimated_savings": {
-            "$ref": "#/components/schemas/SavingsObject",
+            "$ref": "#/components/schemas/MoneyAmount",
             "nullable": true,
             "description": "Estimated monthly savings from tightening quota (tighten recommendations)"
           },
@@ -10427,7 +10429,7 @@
             "$ref": "#/components/schemas/QuotaCapacityFreed"
           },
           "estimated_savings": {
-            "$ref": "#/components/schemas/SavingsObject",
+            "$ref": "#/components/schemas/MoneyAmount",
             "nullable": true
           },
           "notifications": {
@@ -10888,7 +10890,7 @@
             "$ref": "#/components/schemas/ClusterQuotaCapacityFreed"
           },
           "estimated_savings": {
-            "$ref": "#/components/schemas/SavingsObject",
+            "$ref": "#/components/schemas/MoneyAmount",
             "nullable": true
           },
           "notifications": {
@@ -10983,7 +10985,7 @@
             "$ref": "#/components/schemas/ClusterQuotaCapacityFreed"
           },
           "estimated_savings": {
-            "$ref": "#/components/schemas/SavingsObject",
+            "$ref": "#/components/schemas/MoneyAmount",
             "nullable": true
           },
           "notifications": {
@@ -11155,7 +11157,7 @@
             ]
           },
           "estimated_monthly_waste": {
-            "$ref": "#/components/schemas/SavingsObject"
+            "$ref": "#/components/schemas/MoneyAmount"
           },
           "container_count": {
             "type": "integer",
@@ -11588,7 +11590,7 @@
             "description": "Estimated monthly savings from rightsizing. Null when ROS_SAVINGS_ESTIMATES_ENABLED is false, Koku masu is not configured, or no cost-model rates exist for the cluster.",
             "allOf": [
               {
-                "$ref": "#/components/schemas/SavingsObject"
+                "$ref": "#/components/schemas/MoneyAmount"
               }
             ]
           },
@@ -11892,22 +11894,22 @@
           "cpu_cost_percentile": {
             "type": "number",
             "format": "double",
-            "description": "Cost engine CPU percentile (0.01–1.0). Lower values rightsizing more aggressively."
+            "description": "Cost engine CPU percentile (0.01\u20131.0). Lower values rightsizing more aggressively."
           },
           "cpu_perf_percentile": {
             "type": "number",
             "format": "double",
-            "description": "Performance engine CPU percentile (0.01–1.0). Higher values reserve more headroom."
+            "description": "Performance engine CPU percentile (0.01\u20131.0). Higher values reserve more headroom."
           },
           "mem_cost_percentile": {
             "type": "number",
             "format": "double",
-            "description": "Cost engine memory percentile (0.01–1.0)."
+            "description": "Cost engine memory percentile (0.01\u20131.0)."
           },
           "mem_perf_percentile": {
             "type": "number",
             "format": "double",
-            "description": "Performance engine memory percentile (0.01–1.0)."
+            "description": "Performance engine memory percentile (0.01\u20131.0)."
           },
           "min_margin": {
             "type": "number",
@@ -11974,22 +11976,22 @@
           "cpu_cost_percentile": {
             "type": "number",
             "format": "double",
-            "description": "Cost engine CPU percentile (0.01–1.0)."
+            "description": "Cost engine CPU percentile (0.01\u20131.0)."
           },
           "cpu_perf_percentile": {
             "type": "number",
             "format": "double",
-            "description": "Performance engine CPU percentile (0.01–1.0)."
+            "description": "Performance engine CPU percentile (0.01\u20131.0)."
           },
           "mem_cost_percentile": {
             "type": "number",
             "format": "double",
-            "description": "Cost engine memory percentile (0.01–1.0)."
+            "description": "Cost engine memory percentile (0.01\u20131.0)."
           },
           "mem_perf_percentile": {
             "type": "number",
             "format": "double",
-            "description": "Performance engine memory percentile (0.01–1.0)."
+            "description": "Performance engine memory percentile (0.01\u20131.0)."
           }
         },
         "additionalProperties": true
