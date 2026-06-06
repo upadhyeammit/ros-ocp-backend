@@ -9098,7 +9098,15 @@
           },
           "confidence": {
             "type": "number",
-            "format": "float"
+            "format": "float",
+            "description": "Time-slicing confidence (derived from candidate container confidence and impacted-workload ratio). Same value as confidence_level."
+          },
+          "confidence_level": {
+            "type": "number",
+            "format": "float",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Alias for confidence; standard field name aligned with container/PVC/node recommendations."
           },
           "candidate_containers": {
             "type": "array",
@@ -9250,7 +9258,15 @@
           },
           "confidence": {
             "type": "number",
-            "format": "float"
+            "format": "float",
+            "description": "GPU MIG confidence from observation-day tiers and burst penalty. Same value as confidence_level."
+          },
+          "confidence_level": {
+            "type": "number",
+            "format": "float",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Alias for confidence; standard field name aligned with container/PVC/node recommendations."
           },
           "gpu_idle_state": {
             "type": "string",
@@ -9564,6 +9580,17 @@
       "NodeUtilizationTermRec": {
         "type": "object",
         "properties": {
+          "confidence_level": {
+            "type": "number",
+            "format": "float",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Confidence in the recommendation: min(data_days / window_days, 1.0) for the term. Notification code 1 when below LowConfidenceThreshold (default 0.5)."
+          },
+          "data_days": {
+            "type": "integer",
+            "description": "Number of daily node digests in the term window"
+          },
           "recommendation_engines": {
             "$ref": "#/components/schemas/NodeUtilizationEngines"
           }
