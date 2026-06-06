@@ -3582,6 +3582,20 @@
               "type": "string"
             },
             "description": "Exact match or wildcard (`*` \u2192 SQL LIKE). Nodes without MachineSet labels are excluded from this API."
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "description": "Response format. Use `csv` for flattened export (one row per MachineSet group). JSON is the default. `Accept: text/csv` is also supported.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "json",
+                "csv"
+              ],
+              "default": "json"
+            }
           }
         ],
         "responses": {
@@ -3592,6 +3606,9 @@
                 "schema": {
                   "$ref": "#/components/schemas/MachineSetRecommendationListResponse"
                 }
+              },
+              "text/csv": {
+                "description": "Flattened CSV export (one row per MachineSet group)."
               }
             }
           },
@@ -5180,7 +5197,16 @@
           {
             "name": "cluster_uuid",
             "in": "query",
-            "description": "Filter by cluster UUID",
+            "description": "Legacy flat alias for filter[cluster].",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "filter[cluster]",
+            "in": "query",
+            "description": "Filter by cluster UUID.",
             "schema": {
               "type": "string",
               "format": "uuid"
@@ -5189,7 +5215,15 @@
           {
             "name": "namespace",
             "in": "query",
-            "description": "Filter by namespace",
+            "description": "Legacy flat alias for filter[project].",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[project]",
+            "in": "query",
+            "description": "Filter by namespace (project).",
             "schema": {
               "type": "string"
             }
@@ -5197,7 +5231,23 @@
           {
             "name": "recommendation_type",
             "in": "query",
-            "description": "Filter by recommendation type",
+            "description": "Legacy flat alias for filter[recommendation_type].",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "orphaned",
+                "never_restored",
+                "redundant",
+                "stale",
+                "managed",
+                "active"
+              ]
+            }
+          },
+          {
+            "name": "filter[recommendation_type]",
+            "in": "query",
+            "description": "Filter by snapshot recommendation classification.",
             "schema": {
               "type": "string",
               "enum": [
