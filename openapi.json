@@ -10005,29 +10005,25 @@
         "type": "object",
         "properties": {
           "container": {
-            "type": "number",
-            "format": "float"
+            "$ref": "#/components/schemas/MoneyAmount"
           },
           "gpu": {
-            "type": "number",
-            "format": "float"
+            "$ref": "#/components/schemas/MoneyAmount",
+            "description": "Always zero in fleet summary; GPU dollar estimates are computed at API read time on container/node detail endpoints."
           },
           "node": {
-            "type": "number",
-            "format": "float"
+            "$ref": "#/components/schemas/MoneyAmount"
           },
           "pvc": {
-            "type": "number",
-            "format": "float"
+            "$ref": "#/components/schemas/MoneyAmount"
           },
           "snapshot": {
-            "type": "number",
-            "format": "float"
+            "$ref": "#/components/schemas/MoneyAmount",
+            "description": "Sum of recoverable snapshot holding cost (waste), not savings."
           },
           "vm": {
-            "type": "number",
-            "format": "float",
-            "description": "Sum of persisted VM recommendation savings_amount for the selected `term` (short_term, medium_term, or long_term) and `engine` (requires ROS_SAVINGS_ESTIMATES_ENABLED and Koku effective_rates at ingestion)."
+            "$ref": "#/components/schemas/MoneyAmount",
+            "description": "Sum of persisted VM recommendation savings for the selected `term` (short_term, medium_term, or long_term) and `engine` (requires ROS_SAVINGS_ESTIMATES_ENABLED and Koku effective_rates at ingestion)."
           }
         }
       },
