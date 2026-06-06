@@ -2805,6 +2805,14 @@
             }
           },
           {
+            "name": "after",
+            "in": "query",
+            "description": "Opaque base64url cursor from a previous response's `meta.next_cursor`. When set, the server uses keyset pagination and **ignores `offset`**. See [API pagination](docs-site/pagination.md).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "format",
             "in": "query",
             "description": "Response format. Use `csv` for flattened export (one row per VM recommendation). JSON is the default. `Accept: text/csv` is also supported.",
@@ -3505,6 +3513,14 @@
               "type": "integer",
               "minimum": 0,
               "default": 0
+            }
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "description": "Opaque base64url cursor from a previous response's `meta.next_cursor`. When set, the server uses keyset pagination and **ignores `offset`**. See [API pagination](docs-site/pagination.md).",
+            "schema": {
+              "type": "string"
             }
           },
           {
@@ -4368,6 +4384,14 @@
             }
           },
           {
+            "name": "after",
+            "in": "query",
+            "description": "Opaque base64url cursor from a previous response's `meta.next_cursor`. When set, the server uses keyset pagination and **ignores `offset`**. See [API pagination](docs-site/pagination.md).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "order_by",
             "in": "query",
             "description": "Sort field. Bracket form `order_by[field]` is also accepted.",
@@ -4726,6 +4750,14 @@
               "type": "integer",
               "default": 0,
               "minimum": 0
+            }
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "description": "Opaque base64url cursor from a previous response's `meta.next_cursor`. When set, the server uses keyset pagination and **ignores `offset`**. See [API pagination](docs-site/pagination.md).",
+            "schema": {
+              "type": "string"
             }
           },
           {
@@ -9016,11 +9048,6 @@
               "type": "string"
             },
             "description": "Optional warnings about degraded data quality (e.g., GPU enrichment failures, scan errors)"
-          },
-          "currency": {
-            "type": "string",
-            "description": "ISO 4217 currency code for savings fields (from Koku cost model). Defaults to USD.",
-            "example": "USD"
           }
         }
       },
@@ -9039,10 +9066,21 @@
             "type": "integer",
             "description": "Zero-based offset into results"
           },
-          "total_savings_usd": {
-            "type": "number",
-            "format": "float",
-            "nullable": true
+          "currency": {
+            "type": "string",
+            "description": "ISO 4217 currency code for savings fields (from Koku cost model). Defaults to USD.",
+            "example": "USD"
+          },
+          "total_savings": {
+            "$ref": "#/components/schemas/SavingsObject",
+            "nullable": true,
+            "description": "Sum of total_node_savings across the current page"
+          },
+          "has_next": {
+            "type": "boolean"
+          },
+          "next_cursor": {
+            "type": "string"
           }
         }
       },
@@ -9086,14 +9124,12 @@
             "minimum": 2,
             "maximum": 8
           },
-          "savings_per_gpu_usd": {
-            "type": "number",
-            "format": "float",
+          "savings_per_gpu": {
+            "$ref": "#/components/schemas/SavingsObject",
             "nullable": true
           },
-          "total_node_savings_usd": {
-            "type": "number",
-            "format": "float",
+          "total_node_savings": {
+            "$ref": "#/components/schemas/SavingsObject",
             "nullable": true
           },
           "confidence": {
@@ -9308,10 +9344,9 @@
             "type": "integer",
             "description": "Sum of node_count_reduction across nodes in the group."
           },
-          "total_monthly_savings_usd": {
-            "type": "number",
-            "format": "double",
-            "description": "Sum of estimated_monthly_savings_usd for member nodes (USD)."
+          "total_monthly_savings": {
+            "$ref": "#/components/schemas/SavingsObject",
+            "description": "Sum of estimated monthly savings for member nodes."
           },
           "avg_cpu_utilization": {
             "type": "number",
@@ -9365,6 +9400,18 @@
           },
           "offset": {
             "type": "integer"
+          },
+          "has_next": {
+            "type": "boolean"
+          },
+          "next_cursor": {
+            "type": "string",
+            "description": "Opaque cursor to pass as `after` on the next request when `has_next` is true."
+          },
+          "currency": {
+            "type": "string",
+            "description": "ISO 4217 currency code for total_monthly_savings (from Koku cost model). Defaults to USD.",
+            "example": "USD"
           }
         }
       },
@@ -9735,12 +9782,12 @@
       },
       "SavingsObject": {
         "type": "object",
-        "description": "Structured monthly savings amount with six-decimal string value and ISO currency units. Savings estimates are approximate projections based on current resource pricing and observed usage patterns. Actual savings may vary due to rate changes, workload fluctuations, and shared infrastructure overhead. Negative values are valid and indicate the current resource allocation is already below the recommended target (additional monthly cost to reach the recommendation).",
+        "description": "Structured monthly savings amount with two-decimal string value and ISO currency units. Savings estimates are approximate projections based on current resource pricing and observed usage patterns. Actual savings may vary due to rate changes, workload fluctuations, and shared infrastructure overhead. Negative values are valid and indicate the current resource allocation is already below the recommended target (additional monthly cost to reach the recommendation).",
         "properties": {
           "value": {
             "type": "string",
-            "description": "Savings amount as a decimal string with six fractional digits",
-            "example": "12.340000"
+            "description": "Savings amount as a decimal string with two fractional digits",
+            "example": "12.34"
           },
           "units": {
             "type": "string",
@@ -10457,6 +10504,13 @@
               "offset": {
                 "type": "integer"
               },
+              "has_next": {
+                "type": "boolean"
+              },
+              "next_cursor": {
+                "type": "string",
+                "description": "Opaque cursor to pass as `after` on the next request when `has_next` is true."
+              },
               "currency": {
                 "type": "string",
                 "description": "ISO 4217 currency code for estimated_savings (from Koku cost model). Defaults to USD.",
@@ -10744,17 +10798,25 @@
         "description": "Utilization percentages for CPU, memory, storage, and pod count quota dimensions only. Object-count resources (e.g. count/deployments.apps) are excluded from these fields and from order_by=utilization sorting; they still contribute to risk_level and blocking notifications (code 72).",
         "properties": {
           "cpu_request_percent": {
-            "type": "integer"
+            "type": "number",
+            "format": "float",
+            "nullable": true
           },
           "memory_request_percent": {
-            "type": "integer"
+            "type": "number",
+            "format": "float",
+            "nullable": true
           },
           "storage_request_percent": {
-            "type": "integer",
+            "type": "number",
+            "format": "float",
+            "nullable": true,
             "description": "Storage request utilization percent (0-100)"
           },
           "pods_percent": {
-            "type": "integer",
+            "type": "number",
+            "format": "float",
+            "nullable": true,
             "description": "Pod count utilization percent (0-100)"
           }
         }
@@ -10779,18 +10841,6 @@
             "type": "integer",
             "format": "int64",
             "description": "Pod count capacity freed on tighten (no monetary savings)"
-          }
-        }
-      },
-      "ClusterQuotaSavingsMonthly": {
-        "type": "object",
-        "properties": {
-          "value": {
-            "type": "integer"
-          },
-          "units": {
-            "type": "string",
-            "example": "USD"
           }
         }
       },
@@ -10838,7 +10888,8 @@
             "$ref": "#/components/schemas/ClusterQuotaCapacityFreed"
           },
           "estimated_savings": {
-            "$ref": "#/components/schemas/ClusterQuotaSavingsMonthly"
+            "$ref": "#/components/schemas/SavingsObject",
+            "nullable": true
           },
           "notifications": {
             "type": "object",
@@ -10932,7 +10983,8 @@
             "$ref": "#/components/schemas/ClusterQuotaCapacityFreed"
           },
           "estimated_savings": {
-            "$ref": "#/components/schemas/ClusterQuotaSavingsMonthly"
+            "$ref": "#/components/schemas/SavingsObject",
+            "nullable": true
           },
           "notifications": {
             "type": "object",
@@ -10971,6 +11023,18 @@
               },
               "offset": {
                 "type": "integer"
+              },
+              "has_next": {
+                "type": "boolean"
+              },
+              "next_cursor": {
+                "type": "string",
+                "description": "Opaque cursor to pass as `after` on the next request when `has_next` is true."
+              },
+              "currency": {
+                "type": "string",
+                "description": "ISO 4217 currency code for estimated_savings (from Koku cost model). Defaults to USD.",
+                "example": "USD"
               }
             }
           },
@@ -11150,6 +11214,13 @@
           },
           "offset": {
             "type": "integer"
+          },
+          "has_next": {
+            "type": "boolean"
+          },
+          "next_cursor": {
+            "type": "string",
+            "description": "Opaque cursor to pass as `after` on the next request when `has_next` is true."
           }
         }
       },
