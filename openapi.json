@@ -5018,11 +5018,12 @@
           {
             "name": "group_by",
             "in": "query",
-            "description": "Aggregation dimension: project (namespace) or cluster",
+            "description": "Aggregation dimension: project or namespace (per-namespace rollup) or cluster",
             "schema": {
               "type": "string",
               "enum": [
                 "project",
+                "namespace",
                 "cluster"
               ],
               "default": "project"
