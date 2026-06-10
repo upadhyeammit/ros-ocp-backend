@@ -7384,6 +7384,15 @@
             "format": "date-time",
             "description": "Timestamp when analytics became incomplete for this cluster. Null when analytics are complete."
           },
+          "ingest_hooks_failed": {
+            "type": "boolean",
+            "description": "Indicates that one or more plugin ingest hooks (e.g. GPU or node digest upserts) failed during the most recent CSV ingestion for this cluster. Recommendations may be based on incomplete derived data."
+          },
+          "ingest_hooks_failed_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when ingest hook failures were last recorded for this cluster. Null when hooks succeeded on the latest ingest."
+          },
           "currency": {
             "type": "string",
             "description": "ISO 4217 currency code for monetary fields (from Koku cost model). Defaults to USD.",
