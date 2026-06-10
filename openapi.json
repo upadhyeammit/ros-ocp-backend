@@ -7375,6 +7375,15 @@
             "format": "date-time",
             "example": "2026-01-18T15:48:54.000Z"
           },
+          "analytics_incomplete": {
+            "type": "boolean",
+            "description": "Indicates that analytics data (history or quality metrics) may be incomplete for this cluster due to a transient write failure during ingestion."
+          },
+          "analytics_incomplete_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when analytics became incomplete for this cluster. Null when analytics are complete."
+          },
           "currency": {
             "type": "string",
             "description": "ISO 4217 currency code for monetary fields (from Koku cost model). Defaults to USD.",
