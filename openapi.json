@@ -1056,7 +1056,7 @@
             }
           },
           "503": {
-            "description": "Service temporarily unavailable — database unreachable",
+            "description": "Service temporarily unavailable \u2014 database unreachable",
             "content": {
               "application/json": {
                 "schema": {
@@ -1202,7 +1202,7 @@
             }
           },
           "503": {
-            "description": "Service temporarily unavailable — database unreachable",
+            "description": "Service temporarily unavailable \u2014 database unreachable",
             "content": {
               "application/json": {
                 "schema": {
@@ -1327,14 +1327,7 @@
             "description": "Validation error (invalid name, window_days out of range, min_data_days > window_days, etc.)"
           },
           "403": {
-            "description": "Forbidden — cost_management entitlement required, or tenant settings globally locked (ROS_SETTINGS_LOCKED for recommendation_type or terms) or RBAC denied",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SettingsLockedForbiddenResponse"
-                }
-              }
-            }
+            "$ref": "#/components/responses/ForbiddenEntitlementOrSettingsLocked"
           },
           "422": {
             "description": "One or more terms are locked by administrator environment variables and cannot be modified",
@@ -1407,14 +1400,7 @@
             "description": "Missing or invalid recommendation_type"
           },
           "403": {
-            "description": "Forbidden — cost_management entitlement required, or tenant settings globally locked (ROS_SETTINGS_LOCKED for recommendation_type or terms) or RBAC denied",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SettingsLockedForbiddenResponse"
-                }
-              }
-            }
+            "$ref": "#/components/responses/ForbiddenEntitlementOrSettingsLocked"
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
@@ -1551,7 +1537,7 @@
           "Business Hours Settings"
         ],
         "summary": "Get effective business hours schedule",
-        "description": "Resolves the inheritance chain (namespace → cluster → org) for optional cluster_id and namespace query parameters and returns the effective schedule with resolved_from metadata.",
+        "description": "Resolves the inheritance chain (namespace \u2192 cluster \u2192 org) for optional cluster_id and namespace query parameters and returns the effective schedule with resolved_from metadata.",
         "operationId": "getBusinessHoursEffective",
         "x-plugin-required": "business-hours",
         "parameters": [
@@ -2434,7 +2420,7 @@
             "$ref": "#/components/responses/ForbiddenEntitlement"
           },
           "404": {
-            "description": "Plugin disabled — enable the `gpu` plugin via ROS_ENABLED_PLUGINS"
+            "description": "Plugin disabled \u2014 enable the `gpu` plugin via ROS_ENABLED_PLUGINS"
           },
           "503": {
             "description": "Service unavailable"
@@ -2558,7 +2544,7 @@
           {
             "name": "format",
             "in": "query",
-            "description": "Response format. Use `csv` for flattened export (one row per node×GPU-model time-slicing recommendation). JSON is the default. `Accept: text/csv` is also supported.",
+            "description": "Response format. Use `csv` for flattened export (one row per node\u00d7GPU-model time-slicing recommendation). JSON is the default. `Accept: text/csv` is also supported.",
             "required": false,
             "schema": {
               "type": "string",
@@ -2604,7 +2590,7 @@
                   "type": "string",
                   "format": "binary"
                 },
-                "description": "Flattened CSV export (one row per node×GPU-model time-slicing recommendation)."
+                "description": "Flattened CSV export (one row per node\u00d7GPU-model time-slicing recommendation)."
               }
             }
           },
@@ -2612,7 +2598,7 @@
             "$ref": "#/components/responses/ForbiddenEntitlement"
           },
           "404": {
-            "description": "Plugin disabled — enable the `gpu` plugin via ROS_ENABLED_PLUGINS"
+            "description": "Plugin disabled \u2014 enable the `gpu` plugin via ROS_ENABLED_PLUGINS"
           },
           "503": {
             "description": "Service unavailable"
@@ -2784,7 +2770,7 @@
             "$ref": "#/components/responses/ForbiddenEntitlement"
           },
           "404": {
-            "description": "Plugin disabled — enable the `gpu` plugin via ROS_ENABLED_PLUGINS"
+            "description": "Plugin disabled \u2014 enable the `gpu` plugin via ROS_ENABLED_PLUGINS"
           },
           "503": {
             "description": "Service unavailable"
@@ -3091,7 +3077,7 @@
             "$ref": "#/components/responses/ForbiddenEntitlement"
           },
           "404": {
-            "description": "Plugin disabled — enable VM via ROS_ENABLE_VM_RECS and ROS_ENABLED_PLUGINS"
+            "description": "Plugin disabled \u2014 enable VM via ROS_ENABLE_VM_RECS and ROS_ENABLED_PLUGINS"
           },
           "503": {
             "description": "Service unavailable",
@@ -3352,7 +3338,7 @@
             "$ref": "#/components/responses/ForbiddenEntitlement"
           },
           "404": {
-            "description": "Plugin disabled — enable VM via ROS_ENABLE_VM_RECS and ROS_ENABLED_PLUGINS"
+            "description": "Plugin disabled \u2014 enable VM via ROS_ENABLE_VM_RECS and ROS_ENABLED_PLUGINS"
           },
           "503": {
             "description": "Service unavailable",
@@ -3415,7 +3401,7 @@
             "$ref": "#/components/responses/ForbiddenEntitlement"
           },
           "404": {
-            "description": "Plugin disabled — enable VM via ROS_ENABLE_VM_RECS and ROS_ENABLED_PLUGINS"
+            "description": "Plugin disabled \u2014 enable VM via ROS_ENABLE_VM_RECS and ROS_ENABLED_PLUGINS"
           },
           "500": {
             "description": "Internal error loading instance types",
@@ -3695,7 +3681,7 @@
           {
             "name": "format",
             "in": "query",
-            "description": "Response format. Use `csv` for flattened export (one row per node × term × engine). JSON is the default. `Accept: text/csv` is also supported.",
+            "description": "Response format. Use `csv` for flattened export (one row per node \u00d7 term \u00d7 engine). JSON is the default. `Accept: text/csv` is also supported.",
             "required": false,
             "schema": {
               "type": "string",
@@ -3721,7 +3707,7 @@
                   "type": "string",
                   "format": "binary"
                 },
-                "description": "Flattened CSV export (one row per node × term × engine)."
+                "description": "Flattened CSV export (one row per node \u00d7 term \u00d7 engine)."
               }
             }
           },
@@ -3729,10 +3715,10 @@
             "description": "Bad request"
           },
           "403": {
-            "description": "Forbidden — cost_management entitlement required, or user is not authorized (RBAC). Requires `cost-management:openshift.node:read` permission."
+            "$ref": "#/components/responses/ForbiddenEntitlementOrRBAC"
           },
           "404": {
-            "description": "Plugin disabled — enable the `node` plugin via ROS_ENABLED_PLUGINS"
+            "description": "Plugin disabled \u2014 enable the `node` plugin via ROS_ENABLED_PLUGINS"
           },
           "503": {
             "description": "Service unavailable"
@@ -3837,7 +3823,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "Exact match or wildcard (`*` → SQL LIKE). Nodes without MachineSet labels are excluded from this API."
+            "description": "Exact match or wildcard (`*` \u2192 SQL LIKE). Nodes without MachineSet labels are excluded from this API."
           },
           {
             "name": "format",
@@ -3872,7 +3858,7 @@
             "description": "Bad request"
           },
           "403": {
-            "description": "Forbidden — cost_management entitlement required, or user is not authorized (RBAC). Requires `cost-management:openshift.node:read` permission."
+            "$ref": "#/components/responses/ForbiddenEntitlementOrRBAC"
           },
           "503": {
             "description": "Service unavailable"
@@ -3927,7 +3913,7 @@
             "description": "Bad request"
           },
           "403": {
-            "description": "Forbidden — cost_management entitlement required, or user is not authorized (RBAC). Requires `cost-management:openshift.node:read` permission."
+            "$ref": "#/components/responses/ForbiddenEntitlementOrRBAC"
           },
           "404": {
             "description": "Node not found or node plugin disabled"
@@ -4096,7 +4082,7 @@
             "description": "Bad request"
           },
           "403": {
-            "description": "Forbidden — cost_management entitlement required, or user is not authorized (RBAC). Requires `cost-management:openshift.node:read` permission."
+            "$ref": "#/components/responses/ForbiddenEntitlementOrRBAC"
           },
           "503": {
             "description": "Service unavailable"
@@ -4789,7 +4775,7 @@
             "$ref": "#/components/responses/ForbiddenEntitlement"
           },
           "404": {
-            "description": "Plugin disabled — enable the `quota` plugin via ROS_ENABLED_PLUGINS"
+            "description": "Plugin disabled \u2014 enable the `quota` plugin via ROS_ENABLED_PLUGINS"
           },
           "503": {
             "description": "Service unavailable due to a database error"
@@ -4881,7 +4867,7 @@
             "$ref": "#/components/responses/ForbiddenEntitlement"
           },
           "404": {
-            "description": "Plugin disabled — enable the `quota` plugin via ROS_ENABLED_PLUGINS"
+            "description": "Plugin disabled \u2014 enable the `quota` plugin via ROS_ENABLED_PLUGINS"
           },
           "503": {
             "description": "Service unavailable"
@@ -4923,7 +4909,7 @@
             "description": "Validation error"
           },
           "403": {
-            "description": "Forbidden — cost_management entitlement required, or forbidden (locked fields or RBAC)"
+            "$ref": "#/components/responses/ForbiddenEntitlementOrSettingsLocked"
           },
           "404": {
             "description": "Plugin disabled"
@@ -5172,7 +5158,7 @@
             "$ref": "#/components/responses/ForbiddenEntitlement"
           },
           "404": {
-            "description": "Plugin disabled — enable the `cluster-quota` plugin via ROS_ENABLED_PLUGINS"
+            "description": "Plugin disabled \u2014 enable the `cluster-quota` plugin via ROS_ENABLED_PLUGINS"
           },
           "503": {
             "description": "Service unavailable due to a database error"
@@ -5262,7 +5248,7 @@
             "$ref": "#/components/responses/ForbiddenEntitlement"
           },
           "404": {
-            "description": "Plugin disabled — enable the `cluster-quota` plugin via ROS_ENABLED_PLUGINS"
+            "description": "Plugin disabled \u2014 enable the `cluster-quota` plugin via ROS_ENABLED_PLUGINS"
           },
           "503": {
             "description": "Service unavailable"
@@ -5304,7 +5290,7 @@
             "description": "Validation error"
           },
           "403": {
-            "description": "Forbidden — cost_management entitlement required, or forbidden (locked fields or RBAC)"
+            "$ref": "#/components/responses/ForbiddenEntitlementOrSettingsLocked"
           },
           "404": {
             "description": "Plugin disabled"
@@ -5820,7 +5806,7 @@
                     },
                     "inventory_fresh_hours": {
                       "type": "integer",
-                      "description": "Hours within which snapshot inventory is considered fresh for classification (1–168)",
+                      "description": "Hours within which snapshot inventory is considered fresh for classification (1\u2013168)",
                       "minimum": 1,
                       "maximum": 168,
                       "default": 6
@@ -5883,7 +5869,7 @@
                   },
                   "inventory_fresh_hours": {
                     "type": "integer",
-                    "description": "Hours within which snapshot inventory is considered fresh for classification (1–168)",
+                    "description": "Hours within which snapshot inventory is considered fresh for classification (1\u2013168)",
                     "minimum": 1,
                     "maximum": 168,
                     "default": 6
@@ -5918,7 +5904,7 @@
                     },
                     "inventory_fresh_hours": {
                       "type": "integer",
-                      "description": "Hours within which snapshot inventory is considered fresh for classification (1–168)",
+                      "description": "Hours within which snapshot inventory is considered fresh for classification (1\u2013168)",
                       "minimum": 1,
                       "maximum": 168,
                       "default": 6
@@ -5938,14 +5924,7 @@
             "description": "Invalid request body"
           },
           "403": {
-            "description": "Forbidden — cost_management entitlement required, or field is locked by environment variable, tenant settings globally locked (ROS_SETTINGS_LOCKED), or RBAC denied",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SettingsLockedForbiddenResponse"
-                }
-              }
-            }
+            "$ref": "#/components/responses/ForbiddenEntitlementOrSettingsLocked"
           },
           "503": {
             "description": "Service unavailable due to a database error"
@@ -5967,14 +5946,7 @@
             "description": "Tenant overrides removed"
           },
           "403": {
-            "description": "Forbidden — cost_management entitlement required, or tenant settings globally locked (ROS_SETTINGS_LOCKED) or RBAC denied",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SettingsLockedForbiddenResponse"
-                }
-              }
-            }
+            "$ref": "#/components/responses/ForbiddenEntitlementOrSettingsLocked"
           },
           "503": {
             "description": "Service unavailable due to a database error"
@@ -6109,14 +6081,7 @@
             "description": "Invalid request body or recommendation_type"
           },
           "403": {
-            "description": "Forbidden — cost_management entitlement required, or field locked by environment variable, tenant settings globally locked (ROS_SETTINGS_LOCKED), or RBAC denied",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SettingsLockedForbiddenResponse"
-                }
-              }
-            }
+            "$ref": "#/components/responses/ForbiddenEntitlementOrSettingsLocked"
           },
           "503": {
             "description": "Service unavailable due to a database error"
@@ -6159,14 +6124,7 @@
             "description": "Missing or invalid recommendation_type"
           },
           "403": {
-            "description": "Forbidden — cost_management entitlement required, or tenant settings globally locked (ROS_SETTINGS_LOCKED), field locked by environment variable, or RBAC denied",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SettingsLockedForbiddenResponse"
-                }
-              }
-            }
+            "$ref": "#/components/responses/ForbiddenEntitlementOrSettingsLocked"
           },
           "503": {
             "description": "Service unavailable due to a database error"
@@ -6202,7 +6160,7 @@
             "$ref": "#/components/responses/ForbiddenEntitlement"
           },
           "404": {
-            "description": "Plugin disabled — enable VM via ROS_ENABLE_VM_RECS and ROS_ENABLED_PLUGINS"
+            "description": "Plugin disabled \u2014 enable VM via ROS_ENABLE_VM_RECS and ROS_ENABLED_PLUGINS"
           },
           "503": {
             "description": "Service unavailable"
@@ -6244,14 +6202,7 @@
             "description": "Validation error"
           },
           "403": {
-            "description": "Forbidden — cost_management entitlement required, or field locked, tenant settings globally locked (ROS_SETTINGS_LOCKED), or RBAC denied",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SettingsLockedForbiddenResponse"
-                }
-              }
-            }
+            "$ref": "#/components/responses/ForbiddenEntitlementOrSettingsLocked"
           },
           "404": {
             "description": "Plugin disabled"
@@ -6276,14 +6227,7 @@
             "description": "Tenant overrides removed"
           },
           "403": {
-            "description": "Forbidden — cost_management entitlement required, or tenant settings globally locked (ROS_SETTINGS_LOCKED) or RBAC denied",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SettingsLockedForbiddenResponse"
-                }
-              }
-            }
+            "$ref": "#/components/responses/ForbiddenEntitlementOrSettingsLocked"
           },
           "404": {
             "description": "Plugin disabled"
@@ -6362,14 +6306,7 @@
             "description": "Validation error"
           },
           "403": {
-            "description": "Forbidden — cost_management entitlement required, or tenant settings globally locked (ROS_SETTINGS_LOCKED) or RBAC denied",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SettingsLockedForbiddenResponse"
-                }
-              }
-            }
+            "$ref": "#/components/responses/ForbiddenEntitlementOrSettingsLocked"
           },
           "404": {
             "description": "Plugin disabled"
@@ -6411,14 +6348,7 @@
             }
           },
           "403": {
-            "description": "Forbidden — cost_management entitlement required, or tenant settings globally locked (ROS_SETTINGS_LOCKED) or RBAC denied",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SettingsLockedForbiddenResponse"
-                }
-              }
-            }
+            "$ref": "#/components/responses/ForbiddenEntitlementOrSettingsLocked"
           },
           "404": {
             "description": "Plugin disabled"
@@ -6595,7 +6525,7 @@
             "$ref": "#/components/responses/ForbiddenEntitlement"
           },
           "404": {
-            "description": "Plugin disabled — enable the `namespace` plugin via ROS_ENABLED_PLUGINS"
+            "description": "Plugin disabled \u2014 enable the `namespace` plugin via ROS_ENABLED_PLUGINS"
           },
           "503": {
             "description": "Service unavailable due to a database error"
@@ -6732,7 +6662,7 @@
             "$ref": "#/components/responses/ForbiddenEntitlement"
           },
           "404": {
-            "description": "Plugin disabled — enable the `namespace` plugin via ROS_ENABLED_PLUGINS"
+            "description": "Plugin disabled \u2014 enable the `namespace` plugin via ROS_ENABLED_PLUGINS"
           },
           "503": {
             "description": "Service unavailable due to a database error"
@@ -7097,14 +7027,7 @@
             "description": "Validation error"
           },
           "403": {
-            "description": "Forbidden — cost_management entitlement required, or forbidden (locked fields, ROS_SETTINGS_LOCKED, or RBAC)",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SettingsLockedForbiddenResponse"
-                }
-              }
-            }
+            "$ref": "#/components/responses/ForbiddenEntitlementOrSettingsLocked"
           },
           "503": {
             "description": "Service unavailable"
@@ -7132,14 +7055,7 @@
             }
           },
           "403": {
-            "description": "Forbidden — cost_management entitlement required, or tenant settings globally locked (ROS_SETTINGS_LOCKED) or RBAC denied",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SettingsLockedForbiddenResponse"
-                }
-              }
-            }
+            "$ref": "#/components/responses/ForbiddenEntitlementOrSettingsLocked"
           },
           "503": {
             "description": "Service unavailable"
@@ -7215,14 +7131,7 @@
             "description": "Invalid request body or recommendation_type"
           },
           "403": {
-            "description": "Forbidden — cost_management entitlement required, or field locked by environment variable, tenant settings globally locked (ROS_SETTINGS_LOCKED), or RBAC denied",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SettingsLockedForbiddenResponse"
-                }
-              }
-            }
+            "$ref": "#/components/responses/ForbiddenEntitlementOrSettingsLocked"
           },
           "503": {
             "description": "Service unavailable due to a database error"
@@ -7247,14 +7156,7 @@
             "description": "Missing or invalid recommendation_type"
           },
           "403": {
-            "description": "Forbidden — cost_management entitlement required, or tenant settings globally locked (ROS_SETTINGS_LOCKED), field locked by environment variable, or RBAC denied",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SettingsLockedForbiddenResponse"
-                }
-              }
-            }
+            "$ref": "#/components/responses/ForbiddenEntitlementOrSettingsLocked"
           },
           "503": {
             "description": "Service unavailable due to a database error"
@@ -7330,14 +7232,7 @@
             "description": "Invalid request body or recommendation_type"
           },
           "403": {
-            "description": "Forbidden — cost_management entitlement required, or field locked by environment variable, tenant settings globally locked (ROS_SETTINGS_LOCKED), or RBAC denied",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SettingsLockedForbiddenResponse"
-                }
-              }
-            }
+            "$ref": "#/components/responses/ForbiddenEntitlementOrSettingsLocked"
           },
           "503": {
             "description": "Service unavailable due to a database error"
@@ -7362,14 +7257,7 @@
             "description": "Missing or invalid recommendation_type"
           },
           "403": {
-            "description": "Forbidden — cost_management entitlement required, or tenant settings globally locked (ROS_SETTINGS_LOCKED), field locked by environment variable, or RBAC denied",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SettingsLockedForbiddenResponse"
-                }
-              }
-            }
+            "$ref": "#/components/responses/ForbiddenEntitlementOrSettingsLocked"
           },
           "503": {
             "description": "Service unavailable due to a database error"
@@ -7469,14 +7357,7 @@
             "description": "Invalid request body or recommendation_type"
           },
           "403": {
-            "description": "Forbidden — cost_management entitlement required, or field locked by environment variable, tenant settings globally locked (ROS_SETTINGS_LOCKED), or RBAC denied",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SettingsLockedForbiddenResponse"
-                }
-              }
-            }
+            "$ref": "#/components/responses/ForbiddenEntitlementOrSettingsLocked"
           },
           "503": {
             "description": "Service unavailable due to a database error"
@@ -7501,14 +7382,7 @@
             "description": "Missing or invalid recommendation_type"
           },
           "403": {
-            "description": "Forbidden — cost_management entitlement required, or tenant settings globally locked (ROS_SETTINGS_LOCKED), field locked by environment variable, or RBAC denied",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SettingsLockedForbiddenResponse"
-                }
-              }
-            }
+            "$ref": "#/components/responses/ForbiddenEntitlementOrSettingsLocked"
           },
           "503": {
             "description": "Service unavailable due to a database error"
@@ -7608,14 +7482,7 @@
             "description": "Invalid request body or recommendation_type"
           },
           "403": {
-            "description": "Forbidden — cost_management entitlement required, or field locked by environment variable, tenant settings globally locked (ROS_SETTINGS_LOCKED), or RBAC denied",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SettingsLockedForbiddenResponse"
-                }
-              }
-            }
+            "$ref": "#/components/responses/ForbiddenEntitlementOrSettingsLocked"
           },
           "503": {
             "description": "Service unavailable due to a database error"
@@ -7640,14 +7507,7 @@
             "description": "Missing or invalid recommendation_type"
           },
           "403": {
-            "description": "Forbidden — cost_management entitlement required, or tenant settings globally locked (ROS_SETTINGS_LOCKED), field locked by environment variable, or RBAC denied",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SettingsLockedForbiddenResponse"
-                }
-              }
-            }
+            "$ref": "#/components/responses/ForbiddenEntitlementOrSettingsLocked"
           },
           "503": {
             "description": "Service unavailable due to a database error"
@@ -7747,14 +7607,7 @@
             "description": "Invalid request body or recommendation_type"
           },
           "403": {
-            "description": "Forbidden — cost_management entitlement required, or field locked by environment variable, tenant settings globally locked (ROS_SETTINGS_LOCKED), or RBAC denied",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SettingsLockedForbiddenResponse"
-                }
-              }
-            }
+            "$ref": "#/components/responses/ForbiddenEntitlementOrSettingsLocked"
           },
           "503": {
             "description": "Service unavailable due to a database error"
@@ -7779,14 +7632,7 @@
             "description": "Missing or invalid recommendation_type"
           },
           "403": {
-            "description": "Forbidden — cost_management entitlement required, or tenant settings globally locked (ROS_SETTINGS_LOCKED), field locked by environment variable, or RBAC denied",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SettingsLockedForbiddenResponse"
-                }
-              }
-            }
+            "$ref": "#/components/responses/ForbiddenEntitlementOrSettingsLocked"
           },
           "503": {
             "description": "Service unavailable due to a database error"
@@ -8316,7 +8162,7 @@
           },
           "plots_data": {
             "type": "object",
-            "description": "Map of ISO 8601 timestamp → boxplot data for that time bucket.",
+            "description": "Map of ISO 8601 timestamp \u2192 boxplot data for that time bucket.",
             "additionalProperties": {
               "$ref": "#/components/schemas/PlotsBucket"
             },
@@ -9963,7 +9809,7 @@
         "properties": {
           "count": {
             "type": "integer",
-            "description": "For `timeslicing`, the number of distinct node×GPU-model groups with recent GPU telemetry in `gpu_container_digests` (potential time-slicing candidates), not the count of actionable time-slicing recommendations. The `/gpu/timeslicing` list may return fewer rows because the engine rejects groups that are well-utilized, memory-bound, MIG-preferred, or below replica thresholds. For `mig`, the count of containers with a non-`full_gpu` MIG profile recommendation."
+            "description": "For `timeslicing`, the number of distinct node\u00d7GPU-model groups with recent GPU telemetry in `gpu_container_digests` (potential time-slicing candidates), not the count of actionable time-slicing recommendations. The `/gpu/timeslicing` list may return fewer rows because the engine rejects groups that are well-utilized, memory-bound, MIG-preferred, or below replica thresholds. For `mig`, the count of containers with a non-`full_gpu` MIG profile recommendation."
           },
           "link": {
             "type": "string",
@@ -10118,12 +9964,12 @@
           "avg_cpu_utilization": {
             "type": "number",
             "format": "float",
-            "description": "Average CPU P95 utilization (0.0–1.0) across member nodes."
+            "description": "Average CPU P95 utilization (0.0\u20131.0) across member nodes."
           },
           "avg_memory_utilization": {
             "type": "number",
             "format": "float",
-            "description": "Average memory P95 utilization (0.0–1.0) across member nodes."
+            "description": "Average memory P95 utilization (0.0\u20131.0) across member nodes."
           },
           "nodes": {
             "type": "array",
@@ -11175,7 +11021,7 @@
             "additionalProperties": {
               "$ref": "#/components/schemas/NotificationEntry"
             },
-            "description": "Kruize-compatible notification map (codes 70–72 for quota)"
+            "description": "Kruize-compatible notification map (codes 70\u201372 for quota)"
           },
           "count": {
             "type": "integer",
@@ -11522,7 +11368,7 @@
             "type": "integer",
             "minimum": 0,
             "maximum": 100,
-            "description": "Extra margin on recommended hard limits (10 → multiply container rec sums by 1.10)"
+            "description": "Extra margin on recommended hard limits (10 \u2192 multiply container rec sums by 1.10)"
           },
           "high_risk_threshold_percent": {
             "type": "integer",
@@ -12710,22 +12556,22 @@
           "cpu_cost_percentile": {
             "type": "number",
             "format": "double",
-            "description": "Cost engine CPU percentile (0.01–1.0). Lower values rightsizing more aggressively."
+            "description": "Cost engine CPU percentile (0.01\u20131.0). Lower values rightsizing more aggressively."
           },
           "cpu_perf_percentile": {
             "type": "number",
             "format": "double",
-            "description": "Performance engine CPU percentile (0.01–1.0). Higher values reserve more headroom."
+            "description": "Performance engine CPU percentile (0.01\u20131.0). Higher values reserve more headroom."
           },
           "mem_cost_percentile": {
             "type": "number",
             "format": "double",
-            "description": "Cost engine memory percentile (0.01–1.0)."
+            "description": "Cost engine memory percentile (0.01\u20131.0)."
           },
           "mem_perf_percentile": {
             "type": "number",
             "format": "double",
-            "description": "Performance engine memory percentile (0.01–1.0)."
+            "description": "Performance engine memory percentile (0.01\u20131.0)."
           },
           "min_margin": {
             "type": "number",
@@ -12799,22 +12645,22 @@
           "cpu_cost_percentile": {
             "type": "number",
             "format": "double",
-            "description": "Cost engine CPU percentile (0.01–1.0)."
+            "description": "Cost engine CPU percentile (0.01\u20131.0)."
           },
           "cpu_perf_percentile": {
             "type": "number",
             "format": "double",
-            "description": "Performance engine CPU percentile (0.01–1.0)."
+            "description": "Performance engine CPU percentile (0.01\u20131.0)."
           },
           "mem_cost_percentile": {
             "type": "number",
             "format": "double",
-            "description": "Cost engine memory percentile (0.01–1.0)."
+            "description": "Cost engine memory percentile (0.01\u20131.0)."
           },
           "mem_perf_percentile": {
             "type": "number",
             "format": "double",
-            "description": "Performance engine memory percentile (0.01–1.0)."
+            "description": "Performance engine memory percentile (0.01\u20131.0)."
           },
           "sparse_data_threshold": {
             "type": "integer",
@@ -13010,7 +12856,7 @@
       },
       "VMNetworkQoSSettings": {
         "type": "object",
-        "description": "Simplified network QoS hints for network-bound VMs (notifications 65–66). Full NIC-type recommendations are future work.",
+        "description": "Simplified network QoS hints for network-bound VMs (notifications 65\u201366). Full NIC-type recommendations are future work.",
         "properties": {
           "enabled": {
             "type": "boolean",
@@ -13020,7 +12866,7 @@
             "type": "number",
             "minimum": 0,
             "maximum": 1,
-            "description": "Packet drop ratio (0–1) at or above which to suggest SR-IOV (default 0.01)"
+            "description": "Packet drop ratio (0\u20131) at or above which to suggest SR-IOV (default 0.01)"
           },
           "sriov_throughput_bps": {
             "type": "integer",
@@ -13038,7 +12884,7 @@
       },
       "VMStorageTieringSettings": {
         "type": "object",
-        "description": "Simplified storage tier hints from multi-day I/O patterns (notifications 67–69). Full StorageClass-aware tiering is future work.",
+        "description": "Simplified storage tier hints from multi-day I/O patterns (notifications 67\u201369). Full StorageClass-aware tiering is future work.",
         "properties": {
           "enabled": {
             "type": "boolean",
@@ -13080,7 +12926,7 @@
       },
       "VMPlacementSettings": {
         "type": "object",
-        "description": "Cluster placement, correlated workload, and NUMA sizing checks (notifications 60–63)",
+        "description": "Cluster placement, correlated workload, and NUMA sizing checks (notifications 60\u201363)",
         "properties": {
           "enable_placement_checks": {
             "type": "boolean",
@@ -13197,7 +13043,7 @@
     },
     "responses": {
       "Unauthorized": {
-        "description": "Unauthorized — missing or invalid x-rh-identity header",
+        "description": "Unauthorized \u2014 missing or invalid x-rh-identity header",
         "content": {
           "application/json": {
             "schema": {
@@ -13207,11 +13053,31 @@
         }
       },
       "ForbiddenEntitlement": {
-        "description": "Forbidden — cost_management entitlement required",
+        "description": "Forbidden \u2014 cost_management entitlement required",
         "content": {
           "application/json": {
             "schema": {
               "$ref": "#/components/schemas/ROSAPIError"
+            }
+          }
+        }
+      },
+      "ForbiddenEntitlementOrRBAC": {
+        "description": "Forbidden \u2014 cost_management entitlement required, or user is not authorized (RBAC). Requires `cost-management:openshift.node:read` permission.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ROSAPIError"
+            }
+          }
+        }
+      },
+      "ForbiddenEntitlementOrSettingsLocked": {
+        "description": "Forbidden \u2014 cost_management entitlement required, or field locked by environment variable, tenant settings globally locked (ROS_SETTINGS_LOCKED), or RBAC denied",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SettingsLockedForbiddenResponse"
             }
           }
         }
