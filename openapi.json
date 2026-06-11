@@ -887,6 +887,15 @@
             }
           },
           {
+            "name": "after",
+            "in": "query",
+            "description": "Opaque base64url cursor from a previous response's `meta.next_cursor`. When set, the server uses keyset pagination and **ignores `offset`**. See [API pagination](docs-site/pagination.md).",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "memory-unit",
             "in": "query",
             "description": "unit preference for memory",
@@ -1246,6 +1255,9 @@
           },
           "400": {
             "description": "Missing or invalid recommendation_type"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       },
@@ -1333,6 +1345,9 @@
                 }
               }
             }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       },
@@ -1385,6 +1400,9 @@
                 }
               }
             }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       }
@@ -1411,6 +1429,19 @@
           },
           "404": {
             "description": "Feature disabled via ROS_BUSINESS_HOURS_ENABLED"
+          },
+          "503": {
+            "description": "Service unavailable due to a database error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ROSAPIError"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       },
@@ -1444,6 +1475,19 @@
           },
           "404": {
             "description": "Feature disabled via ROS_BUSINESS_HOURS_ENABLED"
+          },
+          "503": {
+            "description": "Service unavailable due to a database error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ROSAPIError"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       },
@@ -1460,6 +1504,19 @@
           },
           "404": {
             "description": "Feature disabled or override not found"
+          },
+          "503": {
+            "description": "Service unavailable due to a database error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ROSAPIError"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       }
@@ -1510,6 +1567,19 @@
           },
           "404": {
             "description": "Feature disabled or cluster not found"
+          },
+          "503": {
+            "description": "Service unavailable due to a database error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ROSAPIError"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       }
@@ -1548,6 +1618,19 @@
           },
           "404": {
             "description": "Feature disabled or cluster not found"
+          },
+          "503": {
+            "description": "Service unavailable due to a database error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ROSAPIError"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       },
@@ -1593,6 +1676,19 @@
           },
           "404": {
             "description": "Feature disabled or cluster not found"
+          },
+          "503": {
+            "description": "Service unavailable due to a database error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ROSAPIError"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       },
@@ -1621,6 +1717,19 @@
           },
           "404": {
             "description": "Feature disabled or override not found"
+          },
+          "503": {
+            "description": "Service unavailable due to a database error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ROSAPIError"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       }
@@ -1668,6 +1777,19 @@
           },
           "404": {
             "description": "Feature disabled or namespace not found"
+          },
+          "503": {
+            "description": "Service unavailable due to a database error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ROSAPIError"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       },
@@ -1722,6 +1844,19 @@
           },
           "404": {
             "description": "Feature disabled or namespace not found"
+          },
+          "503": {
+            "description": "Service unavailable due to a database error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ROSAPIError"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       },
@@ -1759,6 +1894,19 @@
           },
           "404": {
             "description": "Feature disabled or override not found"
+          },
+          "503": {
+            "description": "Service unavailable due to a database error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ROSAPIError"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       }
@@ -1781,6 +1929,9 @@
                 }
               }
             }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       }
@@ -2007,6 +2158,9 @@
           },
           "503": {
             "description": "Service unavailable due to a database error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       }
@@ -2201,6 +2355,9 @@
           },
           "503": {
             "description": "Service unavailable due to a database error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       }
@@ -2233,6 +2390,9 @@
           },
           "503": {
             "description": "Service unavailable"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       }
@@ -2293,6 +2453,15 @@
               "type": "integer",
               "default": 10,
               "minimum": -1
+            }
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "description": "Opaque base64url cursor from a previous response's `meta.next_cursor`. When set, the server uses keyset pagination and **ignores `offset`**. See [API pagination](docs-site/pagination.md).",
+            "required": false,
+            "schema": {
+              "type": "string"
             }
           },
           {
@@ -2399,6 +2568,9 @@
           },
           "503": {
             "description": "Service unavailable"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       }
@@ -2422,6 +2594,15 @@
               "default": 100,
               "minimum": 1,
               "maximum": 1000
+            }
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "description": "Opaque base64url cursor from a previous response's `meta.next_cursor`. When set, the server uses keyset pagination and **ignores `offset`**. See [API pagination](docs-site/pagination.md).",
+            "required": false,
+            "schema": {
+              "type": "string"
             }
           },
           {
@@ -2559,6 +2740,9 @@
           },
           "503": {
             "description": "Service unavailable"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       }
@@ -2870,6 +3054,9 @@
                 }
               }
             }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       }
@@ -2981,6 +3168,9 @@
                 }
               }
             }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       }
@@ -3125,6 +3315,9 @@
                 }
               }
             }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       }
@@ -3195,6 +3388,9 @@
                 }
               }
             }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       }
@@ -3411,6 +3607,15 @@
             }
           },
           {
+            "name": "after",
+            "in": "query",
+            "description": "Opaque base64url cursor from a previous response's `meta.next_cursor`. When set, the server uses keyset pagination and **ignores `offset`**. See [API pagination](docs-site/pagination.md).",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "offset",
             "in": "query",
             "schema": {
@@ -3483,6 +3688,9 @@
           },
           "503": {
             "description": "Service unavailable"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       }
@@ -3620,6 +3828,9 @@
           },
           "503": {
             "description": "Service unavailable"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       }
@@ -3675,6 +3886,9 @@
           },
           "503": {
             "description": "Service unavailable"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       }
@@ -3781,6 +3995,15 @@
             }
           },
           {
+            "name": "after",
+            "in": "query",
+            "description": "Opaque base64url cursor from a previous response's `meta.next_cursor`. When set, the server uses keyset pagination and **ignores `offset`**. See [API pagination](docs-site/pagination.md).",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "offset",
             "in": "query",
             "schema": {
@@ -3829,6 +4052,9 @@
           },
           "503": {
             "description": "Service unavailable"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       }
@@ -3936,6 +4162,9 @@
           },
           "503": {
             "description": "Service unavailable due to a database error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       }
@@ -3980,6 +4209,9 @@
                 }
               }
             }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       }
@@ -4009,6 +4241,9 @@
           },
           "503": {
             "description": "Service unavailable due to a database error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       }
@@ -4224,6 +4459,9 @@
           },
           "503": {
             "description": "Service unavailable due to a database error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       }
@@ -4288,6 +4526,9 @@
           },
           "503": {
             "description": "Service unavailable due to a database error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       }
@@ -4501,6 +4742,9 @@
           },
           "503": {
             "description": "Service unavailable due to a database error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       }
@@ -4553,6 +4797,9 @@
           },
           "503": {
             "description": "Service unavailable"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       }
@@ -4584,6 +4831,9 @@
           },
           "503": {
             "description": "Service unavailable"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       },
@@ -4626,6 +4876,9 @@
           },
           "503": {
             "description": "Service unavailable"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       },
@@ -4656,6 +4909,9 @@
           },
           "503": {
             "description": "Service unavailable"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       }
@@ -4866,6 +5122,9 @@
           },
           "503": {
             "description": "Service unavailable due to a database error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       }
@@ -4916,6 +5175,9 @@
           },
           "503": {
             "description": "Service unavailable"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       }
@@ -4947,6 +5209,9 @@
           },
           "503": {
             "description": "Service unavailable"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       },
@@ -4989,6 +5254,9 @@
           },
           "503": {
             "description": "Service unavailable"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       },
@@ -5019,6 +5287,9 @@
           },
           "503": {
             "description": "Service unavailable"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       }
@@ -5447,6 +5718,9 @@
           },
           "503": {
             "description": "Service unavailable due to a database error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       }
@@ -5515,6 +5789,9 @@
           },
           "503": {
             "description": "Service unavailable due to a database error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       },
@@ -5615,6 +5892,9 @@
           },
           "503": {
             "description": "Service unavailable due to a database error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       },
@@ -5641,6 +5921,9 @@
           },
           "503": {
             "description": "Service unavailable due to a database error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       }
@@ -5703,6 +5986,9 @@
           },
           "503": {
             "description": "Service unavailable due to a database error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         },
         "deprecated": true
@@ -5777,6 +6063,9 @@
           },
           "503": {
             "description": "Service unavailable due to a database error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         },
         "deprecated": true
@@ -5824,6 +6113,9 @@
           },
           "503": {
             "description": "Service unavailable due to a database error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         },
         "deprecated": true
@@ -5857,6 +6149,9 @@
           },
           "503": {
             "description": "Service unavailable"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       },
@@ -5906,6 +6201,9 @@
           },
           "503": {
             "description": "Service unavailable"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       },
@@ -5935,6 +6233,9 @@
           },
           "503": {
             "description": "Service unavailable"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       }
@@ -5963,6 +6264,9 @@
           },
           "503": {
             "description": "Service unavailable"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       },
@@ -6012,6 +6316,19 @@
           },
           "503": {
             "description": "Service unavailable"
+          },
+          "422": {
+            "description": "Term locked by administrator environment variables",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ROSAPIError"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       },
@@ -6048,6 +6365,9 @@
           },
           "503": {
             "description": "Service unavailable"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       }
@@ -6073,11 +6393,15 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "status": {
+                    "api-server": {
                       "type": "string",
-                      "example": "ok"
+                      "example": "working",
+                      "description": "API server health indicator"
                     }
-                  }
+                  },
+                  "required": [
+                    "api-server"
+                  ]
                 }
               }
             }
@@ -6106,6 +6430,15 @@
             }
           },
           {
+            "name": "after",
+            "in": "query",
+            "description": "Opaque base64url cursor from a previous response's `meta.next_cursor`. When set, the server uses keyset pagination and **ignores `offset`**. See [API pagination](docs-site/pagination.md).",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "offset",
             "in": "query",
             "schema": {
@@ -6206,6 +6539,9 @@
           },
           "503": {
             "description": "Service unavailable due to a database error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       }
@@ -6231,6 +6567,15 @@
             }
           },
           {
+            "name": "after",
+            "in": "query",
+            "description": "Opaque base64url cursor from a previous response's `meta.next_cursor`. When set, the server uses keyset pagination and **ignores `offset`**. See [API pagination](docs-site/pagination.md).",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "offset",
             "in": "query",
             "schema": {
@@ -6331,6 +6676,9 @@
           },
           "503": {
             "description": "Service unavailable due to a database error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       }
@@ -6374,6 +6722,9 @@
           },
           "503": {
             "description": "Service unavailable due to a database error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       }
@@ -6465,6 +6816,9 @@
                 }
               }
             }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       }
@@ -6530,13 +6884,40 @@
         },
         "responses": {
           "200": {
-            "description": "Tags synced"
+            "description": "Tags synced",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TagsSyncResponse"
+                }
+              }
+            }
           },
           "401": {
             "description": "Unauthorized"
           },
           "404": {
             "description": "Tag sync disabled"
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ROSAPIError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ROSAPIError"
+                }
+              }
+            }
           }
         }
       }
@@ -6561,10 +6942,37 @@
         ],
         "responses": {
           "200": {
-            "description": "Tag sync status"
+            "description": "Tag sync status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TagsStatusResponse"
+                }
+              }
+            }
           },
           "404": {
             "description": "Tags feature disabled"
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ROSAPIError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ROSAPIError"
+                }
+              }
+            }
           }
         }
       }
@@ -6592,6 +7000,9 @@
           },
           "503": {
             "description": "Service unavailable"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       },
@@ -6637,6 +7048,9 @@
           },
           "503": {
             "description": "Service unavailable"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       },
@@ -6669,6 +7083,9 @@
           },
           "503": {
             "description": "Service unavailable"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       }
@@ -6700,6 +7117,9 @@
           },
           "503": {
             "description": "Service unavailable due to a database error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       },
@@ -6746,6 +7166,9 @@
           },
           "503": {
             "description": "Service unavailable due to a database error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       },
@@ -6775,6 +7198,9 @@
           },
           "503": {
             "description": "Service unavailable due to a database error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       }
@@ -6806,6 +7232,9 @@
           },
           "503": {
             "description": "Service unavailable due to a database error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       },
@@ -6852,6 +7281,9 @@
           },
           "503": {
             "description": "Service unavailable due to a database error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       },
@@ -6881,6 +7313,9 @@
           },
           "503": {
             "description": "Service unavailable due to a database error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       }
@@ -6926,6 +7361,9 @@
           },
           "503": {
             "description": "Service unavailable due to a database error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       },
@@ -6982,6 +7420,9 @@
           },
           "503": {
             "description": "Service unavailable due to a database error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       },
@@ -7011,6 +7452,9 @@
           },
           "503": {
             "description": "Service unavailable due to a database error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       }
@@ -7056,6 +7500,9 @@
           },
           "503": {
             "description": "Service unavailable due to a database error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       },
@@ -7112,6 +7559,9 @@
           },
           "503": {
             "description": "Service unavailable due to a database error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       },
@@ -7141,6 +7591,9 @@
           },
           "503": {
             "description": "Service unavailable due to a database error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       }
@@ -7186,6 +7639,9 @@
           },
           "503": {
             "description": "Service unavailable due to a database error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       },
@@ -7242,6 +7698,9 @@
           },
           "503": {
             "description": "Service unavailable due to a database error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       },
@@ -7271,6 +7730,78 @@
           },
           "503": {
             "description": "Service unavailable due to a database error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/readyz": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Readiness check",
+        "description": "Reports readiness of the API server and its dependencies (database). Not prefixed with `/api/cost-management/v1`.",
+        "operationId": "getReadyz",
+        "servers": [
+          {
+            "url": "/"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All readiness checks passed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "ok"
+                    },
+                    "checks": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "checks"
+                  ]
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "One or more readiness checks failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "error"
+                    },
+                    "checks": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "checks"
+                  ]
+                }
+              }
+            }
           }
         }
       }
@@ -7628,6 +8159,11 @@
             "type": "integer",
             "description": "Numeric notification code (see notification_code_definitions table). Node examples: 11 underutilized, 12 overcommitted, 13 stranded resources, 15 idle/zombie, 74 pod scheduling limit.",
             "example": 1
+          },
+          "suggested_direction": {
+            "type": "string",
+            "description": "Optional remediation hint for notification code 13 (stranded resources), e.g. memory-optimized or compute-optimized.",
+            "example": "memory-optimized"
           }
         }
       },
@@ -7822,6 +8358,20 @@
                 "type": "integer",
                 "minimum": 0,
                 "example": 0
+              },
+              "has_next": {
+                "type": "boolean",
+                "description": "True when another page exists after this one (keyset pagination)."
+              },
+              "next_cursor": {
+                "type": "string",
+                "nullable": true,
+                "description": "Opaque cursor to pass as `after` on the next request when `has_next` is true."
+              },
+              "currency": {
+                "type": "string",
+                "description": "ISO 4217 currency code for monetary fields (from Koku cost model). Defaults to USD.",
+                "example": "USD"
               }
             }
           },
@@ -9399,6 +9949,20 @@
               "type": "string"
             },
             "description": "Optional hints when tag filters yield no results or sync/catalog issues are detected"
+          },
+          "has_next": {
+            "type": "boolean",
+            "description": "True when another page exists after this one (keyset pagination)."
+          },
+          "next_cursor": {
+            "type": "string",
+            "nullable": true,
+            "description": "Opaque cursor to pass as `after` on the next request when `has_next` is true."
+          },
+          "currency": {
+            "type": "string",
+            "description": "ISO 4217 currency code for monetary fields (from Koku cost model). Defaults to USD.",
+            "example": "USD"
           }
         }
       },
@@ -9680,6 +10244,15 @@
             "type": "string",
             "description": "ISO 4217 currency code for savings fields (from Koku cost model). Defaults to USD.",
             "example": "USD"
+          },
+          "has_next": {
+            "type": "boolean",
+            "description": "True when another page exists after this one (keyset pagination)."
+          },
+          "next_cursor": {
+            "type": "string",
+            "nullable": true,
+            "description": "Opaque cursor to pass as `after` on the next request when `has_next` is true."
           }
         }
       },
@@ -10409,6 +10982,16 @@
             "type": "integer",
             "format": "int64",
             "nullable": true
+          },
+          "storage_request_bytes": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "pods": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
           }
         }
       },
@@ -10432,6 +11015,16 @@
             "nullable": true
           },
           "memory_limit_percent": {
+            "type": "number",
+            "format": "float",
+            "nullable": true
+          },
+          "storage_request_percent": {
+            "type": "number",
+            "format": "float",
+            "nullable": true
+          },
+          "pods_percent": {
             "type": "number",
             "format": "float",
             "nullable": true
@@ -10527,6 +11120,10 @@
           "count": {
             "type": "integer",
             "description": "Number of namespace rows in this group (present only when group_by[cluster] or group_by[project] is used)"
+          },
+          "quota_name": {
+            "type": "string",
+            "description": "Kubernetes ResourceQuota object name"
           }
         }
       },
@@ -10687,6 +11284,24 @@
             }
           }
         }
+      },
+      "TagKeyCatalog": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "values": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "key",
+          "values"
+        ]
       },
       "TagsSyncRequest": {
         "type": "object",
@@ -11269,6 +11884,10 @@
             "items": {
               "type": "string"
             }
+          },
+          "settings_locked": {
+            "type": "boolean",
+            "description": "True when ROS_SETTINGS_LOCKED prevents tenant idle-detection settings writes"
           }
         }
       },
@@ -12457,6 +13076,59 @@
             "type": "integer",
             "format": "int32",
             "description": "When DRAM is at or above this, max replicas is halved (5000 = 50%)"
+          }
+        }
+      },
+      "TagsSyncResponse": {
+        "type": "object",
+        "properties": {
+          "updated": {
+            "type": "integer",
+            "description": "Number of org_container_keys rows updated"
+          }
+        },
+        "required": [
+          "updated"
+        ]
+      },
+      "TagsStatusResponse": {
+        "type": "object",
+        "properties": {
+          "org_id": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "synced_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "tag_keys": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TagKeyCatalog"
+            }
+          }
+        },
+        "required": [
+          "org_id",
+          "tag_keys"
+        ]
+      }
+    },
+    "responses": {
+      "Unauthorized": {
+        "description": "Unauthorized \u2014 missing or invalid x-rh-identity header",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ROSAPIError"
+            }
           }
         }
       }
