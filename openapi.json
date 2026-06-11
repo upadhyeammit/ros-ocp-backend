@@ -12698,6 +12698,13 @@
           "low_confidence_threshold": {
             "type": "number",
             "format": "float"
+          },
+          "sparse_data_threshold": {
+            "type": "integer",
+            "description": "Absolute data days at or below which the SPARSE_DATA notification (code 77) fires. Orthogonal to low_confidence_threshold: flags recommendations with few days of observation regardless of window coverage.",
+            "minimum": 1,
+            "maximum": 30,
+            "default": 2
           }
         },
         "additionalProperties": true
@@ -12748,6 +12755,13 @@
             "type": "number",
             "format": "double",
             "description": "Performance engine memory percentile (0.01\u20131.0)."
+          },
+          "sparse_data_threshold": {
+            "type": "integer",
+            "description": "Absolute data days at or below which the SPARSE_DATA notification (code 77) fires.",
+            "minimum": 1,
+            "maximum": 30,
+            "default": 2
           }
         },
         "additionalProperties": true
