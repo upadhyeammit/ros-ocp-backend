@@ -7643,6 +7643,75 @@
         }
       }
     },
+    "/healthz": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Runtime health check",
+        "description": "Detects runtime degradation: goroutine count, GC pause pressure, and scheduler responsiveness. Not prefixed with `/api/cost-management/v1`.",
+        "operationId": "getHealthz",
+        "servers": [
+          {
+            "url": "/"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All runtime health checks passed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "checks": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "checks"
+                  ]
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "One or more runtime health checks failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "checks": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "checks"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/readyz": {
       "get": {
         "tags": [
