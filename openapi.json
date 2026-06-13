@@ -7790,7 +7790,7 @@
           "data": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/Recommendations"
+              "$ref": "#/components/schemas/RecommendationListItem"
             }
           },
           "meta": {
@@ -7841,7 +7841,7 @@
       },
       "Recommendations": {
         "type": "object",
-        "description": "Container recommendation detail (DetailResponse). Used in both list and detail endpoints.",
+        "description": "Container recommendation detail (DetailResponse). Used by GET .../recommendations/openshift/{id}.",
         "properties": {
           "id": {
             "type": "string",
@@ -7959,6 +7959,158 @@
           }
         }
       },
+      "RecommendationListItem": {
+        "type": "object",
+        "description": "Slim container recommendation row for list endpoints. Omits plots, business_hours, duration_in_hours, and per-engine notification maps; exposes deduplicated notification_codes for badge rendering.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Deterministic UUID v5 derived from cluster_uuid/project/workload/container"
+          },
+          "cluster_alias": {
+            "type": "string"
+          },
+          "cluster_uuid": {
+            "type": "string"
+          },
+          "container": {
+            "type": "string"
+          },
+          "project": {
+            "type": "string"
+          },
+          "workload": {
+            "type": "string"
+          },
+          "workload_type": {
+            "type": "string"
+          },
+          "source_id": {
+            "type": "string"
+          },
+          "last_reported": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "analytics_incomplete": {
+            "type": "boolean"
+          },
+          "analytics_incomplete_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ingest_hooks_failed": {
+            "type": "boolean"
+          },
+          "ingest_hooks_failed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "recommendations": {
+            "$ref": "#/components/schemas/ListRecommendations"
+          },
+          "gpu": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/GPURecommendation"
+            }
+          },
+          "idle_state": {
+            "type": "string",
+            "enum": [
+              "active",
+              "idle",
+              "zombie"
+            ]
+          },
+          "idle_since": {
+            "type": "string",
+            "format": "date"
+          },
+          "idle_duration_days": {
+            "type": "integer"
+          },
+          "peak_cpu_millicores": {
+            "type": "integer"
+          },
+          "peak_memory_bytes": {
+            "type": "integer"
+          },
+          "estimated_monthly_waste": {
+            "$ref": "#/components/schemas/MoneyAmount",
+            "nullable": true
+          },
+          "idle_recommendation": {
+            "$ref": "#/components/schemas/IdleRecommendation",
+            "nullable": true
+          }
+        }
+      },
+      "ListRecommendations": {
+        "type": "object",
+        "description": "List-level recommendation payload. Includes flat notification_codes (deduplicated across terms/engines) for UI badges; resolve messages via GET .../notification-codes.",
+        "properties": {
+          "current": {
+            "$ref": "#/components/schemas/ResourceConfig"
+          },
+          "replicas": {
+            "$ref": "#/components/schemas/ReplicaInfo"
+          },
+          "estimated_monthly_savings": {
+            "$ref": "#/components/schemas/MoneyAmount",
+            "nullable": true
+          },
+          "monitoring_end_time": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "notification_codes": {
+            "type": "array",
+            "description": "Deduplicated notification codes across all terms and engines on this row.",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "recommendation_terms": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/ListTermRecommendation"
+            }
+          }
+        }
+      },
+      "ListTermRecommendation": {
+        "type": "object",
+        "description": "Term slice for list responses (no plots, duration_in_hours, or notifications).",
+        "properties": {
+          "recommendation_engines": {
+            "type": "object",
+            "properties": {
+              "cost": {
+                "$ref": "#/components/schemas/ListEngineRecommendation"
+              },
+              "performance": {
+                "$ref": "#/components/schemas/ListEngineRecommendation"
+              }
+            }
+          }
+        }
+      },
+      "ListEngineRecommendation": {
+        "type": "object",
+        "description": "Engine sizing for list responses (config and variation only; notifications omitted).",
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/ResourceConfig"
+          },
+          "variation": {
+            "$ref": "#/components/schemas/ResourceConfig"
+          }
+        }
+      },
       "NamespaceDetailResponse": {
         "type": "object",
         "description": "Namespace recommendation detail. Mirrors Recommendations (container) but without container, workload, workload_type, and gpu fields.",
@@ -7996,7 +8148,7 @@
       },
       "DetailRecommendations": {
         "type": "object",
-        "description": "Wraps term-level recommendations with monitoring_end_time, current resource config, replicas, savings estimate, and notifications.",
+        "description": "Wraps term-level recommendations with monitoring_end_time, current resource config, replicas, and savings estimate. Notifications are emitted per engine only (not aggregated at term or recommendations level).",
         "properties": {
           "current": {
             "$ref": "#/components/schemas/ResourceConfig"
@@ -8014,13 +8166,6 @@
             "format": "date-time",
             "description": "End of the monitoring window used for this recommendation",
             "example": "2026-01-18T00:00:00Z"
-          },
-          "notifications": {
-            "type": "object",
-            "description": "Top-level notifications aggregated from all terms and engines. Keys are string notification codes.",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/NotificationEntry"
-            }
           },
           "recommendation_terms": {
             "type": "object",
@@ -8151,13 +8296,6 @@
             "format": "float",
             "description": "Duration of the analysis window in hours",
             "example": 24.0
-          },
-          "notifications": {
-            "type": "object",
-            "description": "Term-level notifications aggregated from cost and performance engines.",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/NotificationEntry"
-            }
           },
           "plots": {
             "$ref": "#/components/schemas/NativePlot"
