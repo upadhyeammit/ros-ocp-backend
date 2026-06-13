@@ -311,7 +311,7 @@
           {
             "name": "filter[term]",
             "in": "query",
-            "description": "Filter nested recommendation terms in list responses. Accepts `short`, `medium`, `long` or `short_term`, `medium_term`, `long_term`. When omitted, all terms are returned.",
+            "description": "Filter nested recommendation terms in list responses. Accepts `short`, `medium`, `long` or `short_term`, `medium_term`, `long_term`. When omitted, list items default to `short_term` cost only.",
             "required": false,
             "schema": {
               "type": "string",
@@ -328,7 +328,7 @@
           {
             "name": "engine",
             "in": "query",
-            "description": "Legacy flat alias for `filter[engine]`. Cost engine uses lower usage percentiles for rightsizing; performance uses higher percentiles for headroom. When set, the non-selected engine is omitted from `recommendation_engines` on each item. When omitted, both cost and performance are returned.",
+            "description": "Legacy flat alias for `filter[engine]`. Cost engine uses lower usage percentiles for rightsizing; performance uses higher percentiles for headroom. When set, the non-selected engine is omitted from `recommendation_engines` on each item. When omitted, list items default to cost only under the selected term.",
             "required": false,
             "schema": {
               "type": "string",
@@ -341,7 +341,7 @@
           {
             "name": "filter[engine]",
             "in": "query",
-            "description": "Include only this engine in `recommendation_engines` under each term. Cost uses lower percentiles for savings; performance uses higher percentiles for headroom. Omitted engines are not returned in list/detail payloads.",
+            "description": "Include only this engine in `recommendation_engines` under each term. Cost uses lower percentiles for savings; performance uses higher percentiles for headroom. Omitted engines are not returned in list/detail payloads. List items default to cost when term/engine filters are omitted.",
             "required": false,
             "schema": {
               "type": "string",
@@ -826,9 +826,43 @@
             }
           },
           {
+            "name": "term",
+            "in": "query",
+            "description": "Legacy flat alias for `filter[term]`. Limits nested `recommendation_terms` in each list item to the selected term window.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "short",
+                "medium",
+                "long",
+                "short_term",
+                "medium_term",
+                "long_term"
+              ]
+            }
+          },
+          {
+            "name": "filter[term]",
+            "in": "query",
+            "description": "Filter nested recommendation terms in list responses. Accepts `short`, `medium`, `long` or `short_term`, `medium_term`, `long_term`. When omitted, list items default to `short_term` cost only.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "short",
+                "medium",
+                "long",
+                "short_term",
+                "medium_term",
+                "long_term"
+              ]
+            }
+          },
+          {
             "name": "engine",
             "in": "query",
-            "description": "Legacy flat alias for `filter[engine]`. Cost engine uses lower usage percentiles for rightsizing; performance uses higher percentiles for headroom. When set, the non-selected engine is omitted from `recommendation_engines` on each item. When omitted, both cost and performance are returned.",
+            "description": "Legacy flat alias for `filter[engine]`. Cost engine uses lower usage percentiles for rightsizing; performance uses higher percentiles for headroom. When set, the non-selected engine is omitted from `recommendation_engines` on each item. When omitted, list items default to cost only under the selected term.",
             "required": false,
             "schema": {
               "type": "string",
@@ -841,7 +875,7 @@
           {
             "name": "filter[engine]",
             "in": "query",
-            "description": "Include only this engine in `recommendation_engines` under each term. Cost uses lower percentiles for savings; performance uses higher percentiles for headroom. Omitted engines are not returned in list/detail payloads.",
+            "description": "Include only this engine in `recommendation_engines` under each term. Cost uses lower percentiles for savings; performance uses higher percentiles for headroom. Omitted engines are not returned in list/detail payloads. List items default to cost when term/engine filters are omitted.",
             "required": false,
             "schema": {
               "type": "string",
@@ -6476,9 +6510,43 @@
             "example": "environment:production"
           },
           {
+            "name": "term",
+            "in": "query",
+            "description": "Legacy flat alias for `filter[term]`. Limits nested `recommendation_terms` in each list item to the selected term window.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "short",
+                "medium",
+                "long",
+                "short_term",
+                "medium_term",
+                "long_term"
+              ]
+            }
+          },
+          {
+            "name": "filter[term]",
+            "in": "query",
+            "description": "Filter nested recommendation terms in list responses. Accepts `short`, `medium`, `long` or `short_term`, `medium_term`, `long_term`. When omitted, list items default to `short_term` cost only.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "short",
+                "medium",
+                "long",
+                "short_term",
+                "medium_term",
+                "long_term"
+              ]
+            }
+          },
+          {
             "name": "engine",
             "in": "query",
-            "description": "Legacy flat alias for `filter[engine]`. Cost engine uses lower usage percentiles for rightsizing; performance uses higher percentiles for headroom. When set, the non-selected engine is omitted from `recommendation_engines` on each item. When omitted, both cost and performance are returned.",
+            "description": "Legacy flat alias for `filter[engine]`. Cost engine uses lower usage percentiles for rightsizing; performance uses higher percentiles for headroom. When set, the non-selected engine is omitted from `recommendation_engines` on each item. When omitted, list items default to cost only under the selected term.",
             "required": false,
             "schema": {
               "type": "string",
@@ -6491,7 +6559,7 @@
           {
             "name": "filter[engine]",
             "in": "query",
-            "description": "Include only this engine in `recommendation_engines` under each term. Cost uses lower percentiles for savings; performance uses higher percentiles for headroom. Omitted engines are not returned in list/detail payloads.",
+            "description": "Include only this engine in `recommendation_engines` under each term. Cost uses lower percentiles for savings; performance uses higher percentiles for headroom. Omitted engines are not returned in list/detail payloads. List items default to cost when term/engine filters are omitted.",
             "required": false,
             "schema": {
               "type": "string",
@@ -6613,9 +6681,43 @@
             "example": "environment:production"
           },
           {
+            "name": "term",
+            "in": "query",
+            "description": "Legacy flat alias for `filter[term]`. Limits nested `recommendation_terms` in each list item to the selected term window.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "short",
+                "medium",
+                "long",
+                "short_term",
+                "medium_term",
+                "long_term"
+              ]
+            }
+          },
+          {
+            "name": "filter[term]",
+            "in": "query",
+            "description": "Filter nested recommendation terms in list responses. Accepts `short`, `medium`, `long` or `short_term`, `medium_term`, `long_term`. When omitted, list items default to `short_term` cost only.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "short",
+                "medium",
+                "long",
+                "short_term",
+                "medium_term",
+                "long_term"
+              ]
+            }
+          },
+          {
             "name": "engine",
             "in": "query",
-            "description": "Legacy flat alias for `filter[engine]`. Cost engine uses lower usage percentiles for rightsizing; performance uses higher percentiles for headroom. When set, the non-selected engine is omitted from `recommendation_engines` on each item. When omitted, both cost and performance are returned.",
+            "description": "Legacy flat alias for `filter[engine]`. Cost engine uses lower usage percentiles for rightsizing; performance uses higher percentiles for headroom. When set, the non-selected engine is omitted from `recommendation_engines` on each item. When omitted, list items default to cost only under the selected term.",
             "required": false,
             "schema": {
               "type": "string",
@@ -6628,7 +6730,7 @@
           {
             "name": "filter[engine]",
             "in": "query",
-            "description": "Include only this engine in `recommendation_engines` under each term. Cost uses lower percentiles for savings; performance uses higher percentiles for headroom. Omitted engines are not returned in list/detail payloads.",
+            "description": "Include only this engine in `recommendation_engines` under each term. Cost uses lower percentiles for savings; performance uses higher percentiles for headroom. Omitted engines are not returned in list/detail payloads. List items default to cost when term/engine filters are omitted.",
             "required": false,
             "schema": {
               "type": "string",
@@ -8445,7 +8547,7 @@
           "data": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/NamespaceRecommendation"
+              "$ref": "#/components/schemas/NamespaceListItem"
             }
           },
           "meta": {
@@ -8499,6 +8601,45 @@
                 "type": "string"
               }
             }
+          }
+        }
+      },
+      "NamespaceListItem": {
+        "type": "object",
+        "description": "Slim namespace list row. Omits plots, duration_in_hours, and per-engine notification maps. Detail endpoint uses NamespaceDetailResponse.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "project": {
+            "type": "string"
+          },
+          "cluster_alias": {
+            "type": "string"
+          },
+          "cluster_uuid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "source_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "last_reported": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "idle_state": {
+            "type": "string",
+            "enum": [
+              "active",
+              "idle",
+              "zombie"
+            ]
+          },
+          "recommendations": {
+            "$ref": "#/components/schemas/ListRecommendations"
           }
         }
       },
