@@ -8260,44 +8260,39 @@
       },
       "PlotsBucket": {
         "type": "object",
-        "description": "CPU and memory boxplot data for a single time bucket.",
+        "description": "CPU and memory percentile-band plot data for a single daily time bucket.",
         "properties": {
           "cpuUsage": {
-            "$ref": "#/components/schemas/BoxPlotDetails"
+            "$ref": "#/components/schemas/PlotDetails"
           },
           "memoryUsage": {
-            "$ref": "#/components/schemas/BoxPlotDetails"
+            "$ref": "#/components/schemas/PlotDetails"
           }
         }
       },
-      "BoxPlotDetails": {
+      "PlotDetails": {
         "type": "object",
-        "description": "Five-number summary (boxplot) for a resource metric in a time bucket.",
+        "description": "Pre-aggregated percentile-band metrics for a resource in a daily digest bucket (P50/P95/P99/max from daily_container_digests or daily_namespace_digests).",
         "properties": {
-          "min": {
+          "p50": {
             "type": "number",
             "format": "float",
-            "description": "Minimum value in the bucket"
+            "description": "50th percentile (median) usage in the bucket"
           },
-          "q1": {
+          "p95": {
             "type": "number",
             "format": "float",
-            "description": "First quartile (25th percentile)"
+            "description": "95th percentile usage in the bucket"
           },
-          "median": {
+          "p99": {
             "type": "number",
             "format": "float",
-            "description": "Median (50th percentile)"
-          },
-          "q3": {
-            "type": "number",
-            "format": "float",
-            "description": "Third quartile (75th percentile)"
+            "description": "99th percentile usage in the bucket"
           },
           "max": {
             "type": "number",
             "format": "float",
-            "description": "Maximum value in the bucket"
+            "description": "Maximum observed usage in the bucket"
           },
           "format": {
             "type": "string",
