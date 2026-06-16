@@ -2471,7 +2471,7 @@
           "GPU Recommendations"
         ],
         "summary": "Get GPU time-slicing recommendations (node level)",
-        "description": "Returns GPU time-slicing recommendations aggregated at the node level. Each recommendation suggests a `nvidia.com/gpu.replicas` value that would allow multiple underutilized workloads to share the same physical GPU via NVIDIA time-slicing.",
+        "description": "Returns GPU time-slicing recommendations aggregated at the node level. Each recommendation suggests a `nvidia.com/gpu.replicas` value that would allow multiple underutilized workloads to share the same physical GPU via NVIDIA time-slicing. Recommendations are persisted at ingest time in `node_gpu_timeslicing_recommendations`; when no persisted rows exist for the organization the handler falls back to compute-at-read from `gpu_container_digests`. Prior snapshots are available via `/recommendations/openshift/gpu/timeslicing/history`.",
         "operationId": "getGpuTimeslicingRecommendations",
         "x-plugin-required": "gpu",
         "parameters": [
@@ -2546,7 +2546,7 @@
           {
             "name": "order_by",
             "in": "query",
-            "description": "Sort field. DB-backed (SQL ORDER BY on gpu_container_digests triples): node_name, cluster_uuid, gpu_model. Values recommended_replicas, confidence, and total_node_savings return HTTP 400 because they require post-aggregate computation.",
+            "description": "Sort field. When persisted recommendations exist for the organization, SQL-backed sorting supports node_name, cluster_uuid, gpu_model, recommended_replicas, confidence, and estimated_savings_cents (aliases: total_node_savings, total_node_savings_usd). When no persisted rows exist, only node_name, cluster_uuid, and gpu_model are supported; recommended_replicas, confidence, and total_node_savings return HTTP 400 because they require post-aggregate computation.",
             "required": false,
             "schema": {
               "type": "string",
@@ -2627,6 +2627,136 @@
                 "description": "Flattened CSV export (one row per node\u00d7GPU-model time-slicing recommendation)."
               }
             }
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenEntitlement"
+          },
+          "404": {
+            "description": "Plugin disabled \u2014 enable the `gpu` plugin via ROS_ENABLED_PLUGINS"
+          },
+          "503": {
+            "description": "Service unavailable"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/recommendations/openshift/gpu/timeslicing/history": {
+      "get": {
+        "tags": [
+          "GPU Recommendations"
+        ],
+        "summary": "Get historical GPU time-slicing recommendation snapshots",
+        "description": "Returns prior node GPU time-slicing recommendation snapshots stored in `node_gpu_timeslicing_recommendation_history` for the given cluster and node.",
+        "operationId": "getGpuTimeslicingRecommendationHistory",
+        "x-plugin-required": "gpu",
+        "parameters": [
+          {
+            "name": "cluster_uuid",
+            "in": "query",
+            "required": true,
+            "description": "Cluster UUID. Alias: `cluster_id` or `filter[cluster]`.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "node_name",
+            "in": "query",
+            "required": true,
+            "description": "Node name (exact match). Alias: `filter[node]`.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "gpu_model",
+            "in": "query",
+            "required": false,
+            "description": "Filter by GPU model name (exact match). Alias: `filter[gpu_model]`.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "term",
+            "in": "query",
+            "required": false,
+            "description": "Filter by recommendation term window (e.g., `short`, `medium`, `long`). Alias: `filter[term]`.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Page size (default 20).",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "minimum": 1
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Zero-based offset into results.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "order_by",
+            "in": "query",
+            "description": "Sort field (default `recorded_at`). Use with `order_how` for direction (default `desc`).",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "recorded_at",
+              "enum": [
+                "recorded_at",
+                "recommended_replicas",
+                "confidence",
+                "candidate_count",
+                "impacted_count"
+              ]
+            }
+          },
+          {
+            "name": "order_how",
+            "in": "query",
+            "description": "Sort direction",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "desc",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "GPU time-slicing recommendation history",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NodeGPUTimeslicingHistoryResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (missing cluster_uuid or node_name)"
           },
           "403": {
             "$ref": "#/components/responses/ForbiddenEntitlement"
@@ -7014,6 +7144,61 @@
         }
       }
     },
+    "/internal/backfill-gpu-timeslicing": {
+      "post": {
+        "tags": [
+          "Internal"
+        ],
+        "summary": "Backfill persisted GPU time-slicing recommendations",
+        "description": "Service-to-service endpoint (requires the `gpu` plugin). Recomputes and persists node GPU time-slicing recommendations for one org, one cluster, or all orgs with GPU digest data. Requires a valid service account bearer token (same auth as tag sync).",
+        "operationId": "postInternalBackfillGPUTimeslicing",
+        "parameters": [
+          {
+            "name": "org_id",
+            "in": "query",
+            "required": false,
+            "description": "Limit backfill to a single organization. When omitted, all orgs with GPU digest data are processed.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cluster_uuid",
+            "in": "query",
+            "required": false,
+            "description": "Limit backfill to a single cluster within the org (or matching cluster when org_id is omitted).",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Backfill completed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackfillGPUTimeslicingResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "GPU plugin disabled"
+          },
+          "503": {
+            "description": "Database unavailable"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
     "/internal/tags/status": {
       "get": {
         "tags": [
@@ -9966,6 +10151,115 @@
             "$ref": "#/components/schemas/MoneyAmount",
             "nullable": true,
             "description": "Estimated monthly GPU waste when gpu_idle_state is idle or zombie."
+          }
+        }
+      },
+      "NodeGPUTimeslicingHistoryRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "org_id": {
+            "type": "string"
+          },
+          "cluster_uuid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "node_name": {
+            "type": "string"
+          },
+          "gpu_model": {
+            "type": "string"
+          },
+          "term": {
+            "type": "string"
+          },
+          "recommended_replicas": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "confidence": {
+            "type": "number",
+            "format": "float"
+          },
+          "candidate_count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "impacted_count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "estimated_savings_cents": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "recorded_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "NodeGPUTimeslicingHistoryResponse": {
+        "type": "object",
+        "properties": {
+          "meta": {
+            "type": "object",
+            "properties": {
+              "count": {
+                "type": "integer",
+                "description": "Total number of matching history rows (before pagination)"
+              },
+              "limit": {
+                "type": "integer",
+                "description": "Page size"
+              },
+              "offset": {
+                "type": "integer",
+                "description": "Zero-based offset into results"
+              }
+            }
+          },
+          "links": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NodeGPUTimeslicingHistoryRow"
+            }
+          }
+        }
+      },
+      "BackfillGPUTimeslicingResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "completed"
+          },
+          "org_id": {
+            "type": "string"
+          },
+          "cluster_uuid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orgs_processed": {
+            "type": "integer",
+            "description": "Number of organizations processed"
+          },
+          "clusters_processed": {
+            "type": "integer",
+            "description": "Number of clusters processed"
           }
         }
       },
