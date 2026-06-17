@@ -638,6 +638,16 @@
               ],
               "default": "cores"
             }
+          },
+          {
+            "name": "include",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Comma-separated list of optional expansion tokens. Supported value: explanation. When requested, detail responses include a nested explanation object with driving factors computed at recommendation time (ADR-0296). Unknown values are silently ignored.",
+            "example": "explanation"
           }
         ],
         "summary": "Get recommendation for container",
@@ -1171,6 +1181,16 @@
               ],
               "default": "cores"
             }
+          },
+          {
+            "name": "include",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Comma-separated list of optional expansion tokens. Supported value: explanation. When requested, detail responses include a nested explanation object with driving factors computed at recommendation time (ADR-0296). Unknown values are silently ignored.",
+            "example": "explanation"
           }
         ],
         "responses": {
@@ -2608,6 +2628,16 @@
               "type": "string"
             },
             "example": "environment:production"
+          },
+          {
+            "name": "include",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Comma-separated list of optional expansion tokens. Supported value: explanation. When requested, detail responses include a nested explanation object with driving factors computed at recommendation time (ADR-0296). Unknown values are silently ignored.",
+            "example": "explanation"
           }
         ],
         "responses": {
@@ -3321,6 +3351,16 @@
               ],
               "default": "cost"
             }
+          },
+          {
+            "name": "include",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Comma-separated list of optional expansion tokens. Supported value: explanation. When requested, detail responses include a nested explanation object with driving factors computed at recommendation time (ADR-0296). Unknown values are silently ignored.",
+            "example": "explanation"
           }
         ],
         "responses": {
@@ -4060,6 +4100,16 @@
               "format": "uuid"
             },
             "description": "Optional cluster scope when the node name is not unique across clusters"
+          },
+          {
+            "name": "include",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Comma-separated list of optional expansion tokens. Supported value: explanation. When requested, detail responses include a nested explanation object with driving factors computed at recommendation time (ADR-0296). Unknown values are silently ignored.",
+            "example": "explanation"
           }
         ],
         "responses": {
@@ -4703,6 +4753,16 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "include",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Comma-separated list of optional expansion tokens. Supported value: explanation. When requested, detail responses include a nested explanation object with driving factors computed at recommendation time (ADR-0296). Unknown values are silently ignored.",
+            "example": "explanation"
           }
         ],
         "responses": {
@@ -4977,6 +5037,16 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "include",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Comma-separated list of optional expansion tokens. Supported value: explanation. When requested, detail responses include a nested explanation object with driving factors computed at recommendation time (ADR-0296). Unknown values are silently ignored.",
+            "example": "explanation"
           }
         ],
         "responses": {
@@ -5358,6 +5428,16 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "include",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Comma-separated list of optional expansion tokens. Supported value: explanation. When requested, detail responses include a nested explanation object with driving factors computed at recommendation time (ADR-0296). Unknown values are silently ignored.",
+            "example": "explanation"
           }
         ],
         "responses": {
@@ -5810,6 +5890,16 @@
               ],
               "default": "json"
             }
+          },
+          {
+            "name": "include",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Comma-separated list of optional expansion tokens. Supported value: explanation. When requested, detail responses include a nested explanation object with driving factors computed at recommendation time (ADR-0296). Unknown values are silently ignored.",
+            "example": "explanation"
           }
         ],
         "responses": {
@@ -6923,6 +7013,16 @@
               "type": "string",
               "format": "uuid"
             }
+          },
+          {
+            "name": "include",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Comma-separated list of optional expansion tokens. Supported value: explanation. When requested, detail responses include a nested explanation object with driving factors computed at recommendation time (ADR-0296). Unknown values are silently ignored.",
+            "example": "explanation"
           }
         ],
         "responses": {
@@ -8624,6 +8724,9 @@
             "additionalProperties": {
               "$ref": "#/components/schemas/NotificationEntry"
             }
+          },
+          "explanation": {
+            "$ref": "#/components/schemas/ContainerExplanation"
           }
         }
       },
@@ -13676,6 +13779,147 @@
           "org_id",
           "tag_keys"
         ]
+      },
+      "ContainerExplanation": {
+        "type": "object",
+        "description": "Driving factors for container/namespace CPU and memory recommendations. Present only when include=explanation is requested and explanation columns are populated.",
+        "properties": {
+          "confidence_level": {
+            "type": "number",
+            "format": "float"
+          },
+          "data_days": {
+            "type": "integer"
+          },
+          "decay_half_life_hours": {
+            "type": "number",
+            "format": "float"
+          },
+          "cpu_cost_percentile_millicores": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "cpu_perf_percentile_millicores": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "cpu_usage_p95_millicores": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "cpu_adaptive_margin_basis_points": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "mem_cost_percentile_kib": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "mem_adaptive_margin_basis_points": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "oom_count_sum": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "oom_bump_applied": {
+            "type": "boolean"
+          },
+          "cpu_floor_applied": {
+            "type": "boolean"
+          },
+          "is_idle": {
+            "type": "boolean"
+          }
+        }
+      },
+      "GPUExplanation": {
+        "type": "object",
+        "description": "Driving factors for container GPU recommendations.",
+        "properties": {
+          "gpu_sm_active_avg_basis_points": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "gpu_recommended_profile": {
+            "type": "string"
+          },
+          "gpu_has_profiling_data": {
+            "type": "boolean"
+          },
+          "gpu_memory_bound": {
+            "type": "boolean"
+          }
+        }
+      },
+      "NodeExplanation": {
+        "type": "object",
+        "description": "Driving factors for node CPU/memory recommendations.",
+        "properties": {
+          "confidence_level": {
+            "type": "number",
+            "format": "float"
+          },
+          "data_days": {
+            "type": "integer"
+          },
+          "target_utilization_basis_points": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sizing_formula": {
+            "type": "string"
+          },
+          "consolidation_applied": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SnapshotExplanation": {
+        "type": "object",
+        "description": "Driving factors for snapshot classification.",
+        "properties": {
+          "age_days": {
+            "type": "integer"
+          },
+          "source_pvc_exists": {
+            "type": "boolean"
+          },
+          "restored_pvc_count": {
+            "type": "integer"
+          },
+          "recommendation_type": {
+            "type": "string"
+          },
+          "threshold_used": {
+            "type": "integer"
+          },
+          "threshold_name": {
+            "type": "string"
+          },
+          "classification_rule": {
+            "type": "string"
+          }
+        }
+      },
+      "NodeGPUTimeslicingExplanation": {
+        "type": "object",
+        "description": "Driving factors for node GPU time-slicing recommendations.",
+        "properties": {
+          "data_days": {
+            "type": "integer"
+          },
+          "candidate_count": {
+            "type": "integer"
+          },
+          "impacted_count": {
+            "type": "integer"
+          },
+          "classification_rule": {
+            "type": "string"
+          }
+        }
       }
     },
     "responses": {
