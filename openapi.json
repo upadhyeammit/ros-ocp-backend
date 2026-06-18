@@ -3271,7 +3271,7 @@
             "$ref": "#/components/responses/ForbiddenEntitlement"
           },
           "404": {
-            "description": "Plugin disabled \u2014 enable VM via ROS_ENABLE_VM_RECS and ROS_ENABLED_PLUGINS"
+            "description": "Plugin disabled \u2014 enable VM via ROS_ENABLED_PLUGINS (ensure vm is not in ROS_DISABLED_PLUGINS)"
           },
           "503": {
             "description": "Service unavailable",
@@ -3542,7 +3542,7 @@
             "$ref": "#/components/responses/ForbiddenEntitlement"
           },
           "404": {
-            "description": "Plugin disabled \u2014 enable VM via ROS_ENABLE_VM_RECS and ROS_ENABLED_PLUGINS"
+            "description": "Plugin disabled \u2014 enable VM via ROS_ENABLED_PLUGINS (ensure vm is not in ROS_DISABLED_PLUGINS)"
           },
           "503": {
             "description": "Service unavailable",
@@ -3605,7 +3605,7 @@
             "$ref": "#/components/responses/ForbiddenEntitlement"
           },
           "404": {
-            "description": "Plugin disabled \u2014 enable VM via ROS_ENABLE_VM_RECS and ROS_ENABLED_PLUGINS"
+            "description": "Plugin disabled \u2014 enable VM via ROS_ENABLED_PLUGINS (ensure vm is not in ROS_DISABLED_PLUGINS)"
           },
           "500": {
             "description": "Internal error loading instance types",
@@ -6414,7 +6414,7 @@
             "$ref": "#/components/responses/ForbiddenEntitlement"
           },
           "404": {
-            "description": "Plugin disabled \u2014 enable VM via ROS_ENABLE_VM_RECS and ROS_ENABLED_PLUGINS"
+            "description": "Plugin disabled \u2014 enable VM via ROS_ENABLED_PLUGINS (ensure vm is not in ROS_DISABLED_PLUGINS)"
           },
           "503": {
             "description": "Service unavailable"
