@@ -308,7 +308,7 @@ parameters:
 - description: Replica count for processor pod
   name: PROCESSOR_REPLICA_COUNT
   value: "1"
-- description: Replica count for recommendation-poller pod (native: 0)
+- description: "Replica count for recommendation-poller pod (native: 0)"
   name: POLLER_REPLICA_COUNT
   value: "0"
 - description: Image NAME
